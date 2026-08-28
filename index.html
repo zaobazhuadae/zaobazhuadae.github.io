@@ -175,6 +175,10 @@ input[type="text"]:focus, textarea:focus { border-color: #7db8a8; }
     <div class="card" style="background: linear-gradient(135deg, #e8f4f0 0%, #d4ece4 100%);">
       <div class="card-header"><span style="font-size:18px;">📖</span><span class="card-title">词汇训练</span><span class="card-badge" id="vocab-count-badge">当前词库</span></div>
       <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 内置四级核心词汇库，随机抽考。答错会自动加入错题本！</div>
+      <div class="btn-grid btn-grid-2" style="margin-bottom:7px;">
+        <button class="action-btn" id="vocab-scope-highfreq" onclick="setVocabScope('highfreq')"><div class="icon">🔥</div><div class="title">高频词库</div><div class="desc">精选词汇，优先掌握</div></button>
+        <button class="action-btn" id="vocab-scope-all" onclick="setVocabScope('all')"><div class="icon">📚</div><div class="title">全部词库</div><div class="desc">上传资料完整词表</div></button>
+      </div>
       <div class="btn-grid btn-grid-2">
         <button class="action-btn" onclick="startVocab('cn2en')"><div class="icon">🎧</div><div class="title">中→英听写</div><div class="desc">看中文写英文</div></button>
         <button class="action-btn" onclick="startVocab('en2cn')"><div class="icon">✏️</div><div class="title">英→中默写</div><div class="desc">看英文选中文</div></button>
@@ -776,6 +780,71 @@ const vocabDB = [
 {w:"dynamic",m:"动态的，有活力的",p:"adj",e:"She is a dynamic young leader."}
 ];
 
+async function loadUploadedVocab() {
+  const badge = document.getElementById('vocab-count-badge');
+  badge.textContent = '资料加载中';
+
+  try {
+    const files = ['四级词汇表-正序.doc', '四级词汇表-乱序.doc'];
+    const buffers = await Promise.all(files.map(async file => (await fetch(file)).arrayBuffer()));
+    const text = buffers.map(buffer => new TextDecoder('utf-16le').decode(buffer)).join('\n');
+    const existing = new Set(vocabDB.map(item => item.w.toLowerCase()));
+    const imported = [...text.matchAll(/(\d+)\.\s+([A-Za-z][A-Za-z -]*)/g)]
+      .map(match => match[2].trim())
+      .filter(word => word.length > 0 && !existing.has(word.toLowerCase()));
+
+    imported.forEach(word => {
+      vocabDB.push({w:word, m:'四级核心词汇', p:'', e:''});
+      existing.add(word.toLowerCase());
+    });
+    badge.textContent = '当前 ' + vocabDB.length + ' 词';
+    updateStats();
+  } catch (error) {
+    badge.textContent = '内置 ' + vocabDB.length + ' 词';
+  }
+}
+
+async function loadUploadedHotVocab() {
+  try {
+    const response = await fetch('英语四六级翻译热点词汇.docx');
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    let offset = 0;
+    let documentXml = '';
+    while (offset + 30 < bytes.length) {
+      const view = new DataView(bytes.buffer, bytes.byteOffset + offset);
+      if (view.getUint32(0, true) !== 0x04034b50) break;
+      const method = view.getUint16(8, true);
+      const compressedSize = view.getUint32(18, true);
+      const nameSize = view.getUint16(26, true);
+      const extraSize = view.getUint16(28, true);
+      const name = new TextDecoder().decode(bytes.slice(offset + 30, offset + 30 + nameSize));
+      const start = offset + 30 + nameSize + extraSize;
+      const compressed = bytes.slice(start, start + compressedSize);
+      if (name === 'word/document.xml') {
+        if (method === 0) documentXml = new TextDecoder().decode(compressed);
+        if (method === 8 && 'DecompressionStream' in window) {
+          const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+          documentXml = new TextDecoder().decode(await new Response(stream).arrayBuffer());
+        }
+        break;
+      }
+      offset = start + compressedSize;
+    }
+    if (!documentXml) return;
+    const text = new DOMParser().parseFromString(documentXml, 'application/xml').documentElement.textContent;
+    const existing = new Set(vocabDB.map(item => item.w.toLowerCase()));
+    [...text.matchAll(/([一-龥][一-龥（）()·、]{0,19})\s*[:：]\s*([A-Za-z][A-Za-z ,/;()'’.-]{1,100})/g)]
+      .map(match => ({w:match[1].trim(), m:match[2].trim()}))
+      .filter(item => item.w && item.m && !existing.has(item.w.toLowerCase()))
+      .forEach(item => {
+        vocabDB.push({w:item.w, m:item.m, p:'热点', e:''});
+        existing.add(item.w.toLowerCase());
+      });
+    updateStats();
+  } catch (error) {
+  }
+}
+
 const phraseDB = [
 {p:"take up",m:"开始从事；占据",e:"I took up painting last year."},
 {p:"put off",m:"推迟，拖延",e:"Don't put off your homework."},
@@ -1161,6 +1230,7 @@ const mockReadDB = [
 // ==================== 全局状态 ====================
 let currentState = {
   vocabMode: '',
+  vocabScope: 'highfreq',
   vocabIndex: 0,
   vocabList: [],
   vocabCorrect: 0,
@@ -1260,6 +1330,18 @@ function updateStats() {
   document.getElementById('stat-days').textContent = (days > 0 ? days : 0) + '天';
 }
 
+function getVocabPool() {
+  if (currentState.vocabScope === 'all') return vocabDB;
+  return vocabDB.filter(item => item.p || item.m === '热点');
+}
+
+function setVocabScope(scope) {
+  currentState.vocabScope = scope;
+  document.querySelectorAll('[id^="vocab-scope-"]').forEach(button => button.style.outline = 'none');
+  document.getElementById('vocab-scope-' + scope).style.outline = '3px solid #5a9e8a';
+  updateStats();
+}
+
 // ==================== 面板切换 ====================
 function sp(n) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1277,14 +1359,14 @@ function startVocab(mode) {
   currentState.vocabCorrect = 0;
 
   if (mode === 'flash') {
-    currentState.vocabList = shuffle(vocabDB).slice(0, 20);
+    currentState.vocabList = shuffle(getVocabPool()).slice(0, 20);
     currentState.flashIndex = 0;
     renderFlashcard(ws);
     return;
   }
 
   if (mode === 'new10') {
-    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    currentState.vocabList = shuffle(getVocabPool()).slice(0, 10);
     let html = '<div class="quiz-area">';
     currentState.vocabList.forEach((v, i) => {
       html += `<div style="padding:10px;border-bottom:1px solid #d4e8e0;">
@@ -1300,14 +1382,14 @@ function startVocab(mode) {
   }
 
   if (mode === 'cn2en') {
-    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    currentState.vocabList = shuffle(getVocabPool()).slice(0, 10);
     currentState.vocabTotal = 10;
     renderCn2En(ws);
     return;
   }
 
   if (mode === 'en2cn') {
-    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    currentState.vocabList = shuffle(getVocabPool()).slice(0, 10);
     currentState.vocabTotal = 10;
     renderEn2Cn(ws);
     return;
@@ -1483,7 +1565,7 @@ function startHighfreq(mode) {
     ws.innerHTML = html;
     addLearned(10);
   } else if (mode === 'word') {
-    currentState.vocabList = shuffle(vocabDB).slice(0, 15);
+    currentState.vocabList = shuffle(getVocabPool()).slice(0, 15);
     currentState.vocabIndex = 0;
     currentState.vocabCorrect = 0;
     currentState.vocabTotal = 15;
@@ -2153,6 +2235,9 @@ function showFullPlan() {
 
 // ==================== 初始化 ====================
 updateStats();
+setVocabScope('highfreq');
+loadUploadedVocab();
+loadUploadedHotVocab();
 </script>
 </body>
 </html>
