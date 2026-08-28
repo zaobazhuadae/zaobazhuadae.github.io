@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四级500分超级控制台 · 完整交互版</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5faf8; color: #3a5a4e; }
+.container { max-width: 680px; margin: 0 auto; background: #f5faf8; min-height: 100vh; padding-bottom: 40px; }
+.header { background: linear-gradient(135deg, #a8d5c8 0%, #7db8a8 100%); color: white; padding: 24px 18px; text-align: center; position: relative; }
+.badge { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; backdrop-filter: blur(4px); }
+.header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.header p { margin: 6px 0 0 0; opacity: 0.9; font-size: 12px; }
+.stats { display: flex; background: #f0f7f4; border-bottom: 1px solid #d4e8e0; }
+.stat { flex: 1; text-align: center; padding: 12px 4px; border-right: 1px solid #d4e8e0; cursor: pointer; transition: background 0.2s; }
+.stat:last-child { border-right: none; }
+.stat:hover { background: #e4f0ec; }
+.stat-num { font-size: 17px; font-weight: 800; color: #5a9e8a; }
+.stat-label { font-size: 10px; color: #7db8a8; }
+.nav-row { padding: 10px 10px 4px 10px; background: #f5faf8; }
+.nav-row2 { padding: 0 10px 10px 10px; background: #f5faf8; border-bottom: 1px solid #d4e8e0; }
+.nav-grid { display: grid; gap: 5px; }
+.nav-grid-7 { grid-template-columns: repeat(7, 1fr); }
+.nav-grid-6 { grid-template-columns: repeat(6, 1fr); }
+.nav-btn { padding: 7px 2px; border: 2px solid #d4e8e0; border-radius: 10px; background: #f5faf8; cursor: pointer; text-align: center; transition: all 0.2s; font-family: inherit; }
+.nav-btn.active { background: #7db8a8; color: white; border-color: #7db8a8; }
+.nav-btn .icon { font-size: 18px; margin-bottom: 1px; }
+.nav-btn .label { font-size: 9px; font-weight: 700; color: #5a7a6e; }
+.nav-btn.active .label { color: white; }
+.panel { padding: 14px 16px; display: none; }
+.panel.active { display: block; }
+.card { border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.card-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.card-title { font-weight: 800; color: #4a6b5e; font-size: 15px; }
+.card-badge { background: #7db8a8; color: white; font-size: 9px; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+.tip { margin-bottom: 10px; padding: 10px; border-radius: 8px; border-left: 3px solid; font-size: 11px; font-weight: 600; line-height: 1.5; }
+.btn-grid { display: grid; gap: 7px; }
+.btn-grid-2 { grid-template-columns: 1fr 1fr; }
+.btn-grid-1 { grid-template-columns: 1fr; }
+.action-btn { padding: 12px 6px; border: none; border-radius: 10px; background: #f8fcfa; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; text-align: center; transition: transform 0.15s; font-family: inherit; }
+.action-btn:hover { transform: translateY(-2px); background: #fff; }
+.action-btn .icon { font-size: 22px; margin-bottom: 3px; }
+.action-btn .title { font-weight: 700; font-size: 12px; color: #4a6b5e; }
+.action-btn .desc { font-size: 9px; color: #7db8a8; }
+.action-btn-row { padding: 14px; border: none; border-radius: 10px; background: #f8fcfa; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: transform 0.15s; font-family: inherit; width: 100%; }
+.action-btn-row:hover { transform: translateY(-2px); background: #fff; }
+.action-btn-row .icon { font-size: 24px; }
+.action-btn-row .title { font-weight: 700; font-size: 13px; color: #4a6b5e; }
+.action-btn-row .desc { font-size: 10px; color: #7db8a8; }
+.full-btn { width: 100%; margin-top: 7px; padding: 12px; border: none; border-radius: 10px; color: white; font-weight: 700; font-size: 13px; cursor: pointer; transition: transform 0.15s; font-family: inherit; }
+.full-btn:hover { transform: translateY(-2px); }
+.dashed-btn { width: 100%; margin-top: 7px; padding: 10px; border: 2px dashed; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+select { width: 100%; padding: 8px 10px; border: 1px solid #c5ddd4; border-radius: 8px; font-size: 12px; background: #f8fcfa; outline: none; color: #4a6b5e; font-family: inherit; margin-bottom: 10px; }
+input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #c5ddd4; border-radius: 8px; font-size: 13px; background: #fff; outline: none; color: #3a5a4e; font-family: inherit; margin-bottom: 8px; resize: vertical; }
+input[type="text"]:focus, textarea:focus { border-color: #7db8a8; }
+.footer { padding: 12px 16px; background: #f0f7f4; border-top: 1px solid #d4e8e0; text-align: center; }
+.footer p { margin: 0; font-size: 10px; color: #7db8a8; }
+.quiz-area { background: #fff; border-radius: 12px; padding: 16px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.quiz-question { font-size: 15px; font-weight: 700; color: #3a5a4e; margin-bottom: 12px; line-height: 1.6; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-option { padding: 10px 12px; border: 2px solid #d4e8e0; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; background: #f8fcfa; }
+.quiz-option:hover { border-color: #7db8a8; background: #f0f7f4; }
+.quiz-option.correct { border-color: #5cb85c; background: #e8f5e9; color: #2e7d32; }
+.quiz-option.wrong { border-color: #e74c3c; background: #fdecea; color: #c0392b; }
+.quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+.quiz-result { margin-top: 12px; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+.quiz-result.correct { background: #e8f5e9; color: #2e7d32; }
+.quiz-result.wrong { background: #fdecea; color: #c0392b; }
+.score-board { display: flex; gap: 10px; margin-bottom: 12px; }
+.score-tag { flex: 1; text-align: center; padding: 8px; border-radius: 8px; background: #f0f7f4; font-size: 12px; font-weight: 700; color: #5a9e8a; }
+.progress-bar { width: 100%; height: 6px; background: #d4e8e0; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #a8d5c8, #7db8a8); border-radius: 3px; transition: width 0.3s; }
+.flashcard { background: linear-gradient(135deg, #e8f4f0, #d4ece4); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: transform 0.3s; min-height: 120px; display: flex; flex-direction: column; justify-content: center; }
+.flashcard:hover { transform: scale(1.02); }
+.flashcard .cn { font-size: 20px; font-weight: 800; color: #4a6b5e; }
+.flashcard .en { font-size: 16px; color: #7db8a8; margin-top: 8px; display: none; }
+.flashcard .en.show { display: block; }
+.flashcard .pos { font-size: 11px; color: #a8c4b8; margin-top: 4px; display: none; }
+.flashcard .pos.show { display: block; }
+.control-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.control-bar button { padding: 8px 16px; border: none; border-radius: 8px; background: #7db8a8; color: white; font-weight: 700; cursor: pointer; font-size: 12px; }
+.control-bar button.secondary { background: #d4e8e0; color: #5a7a6e; }
+.listen-text { background: #f8fcfa; border-left: 3px solid #7db8a8; padding: 12px; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.8; color: #4a6b5e; margin-bottom: 12px; max-height: 200px; overflow-y: auto; }
+.listen-question { font-weight: 700; margin: 10px 0 6px 0; color: #3a5a4e; }
+.listen-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.listen-option { padding: 8px 10px; border: 1px solid #d4e8e0; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+.listen-option:hover { background: #f0f7f4; }
+.listen-option.selected { border-color: #7db8a8; background: #e8f4f0; }
+.listen-option.correct { border-color: #5cb85c; background: #e8f5e9; }
+.listen-option.wrong { border-color: #e74c3c; background: #fdecea; }
+.listen-option.disabled { pointer-events: none; }
+.answer-reveal { background: #fff8e1; border-left: 3px solid #ffc107; padding: 10px; border-radius: 0 8px 8px 0; font-size: 12px; margin-top: 8px; display: none; }
+.answer-reveal.show { display: block; }
+.trans-input { min-height: 100px; }
+.essay-input { min-height: 150px; }
+.model-answer { background: #f0f7f4; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 13px; line-height: 1.6; display: none; }
+.model-answer.show { display: block; }
+.model-answer h4 { color: #5a9e8a; margin-bottom: 6px; }
+.keywords-check { margin-top: 8px; }
+.keyword-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; margin: 2px; font-weight: 600; }
+.keyword-tag.hit { background: #e8f5e9; color: #2e7d32; }
+.keyword-tag.miss { background: #fdecea; color: #c0392b; }
+.empty-state { text-align: center; padding: 40px 20px; color: #a8c4b8; }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.mistake-item { background: #fff; border-radius: 8px; padding: 10px; margin-bottom: 8px; border-left: 3px solid #e74c3c; font-size: 13px; }
+.mistake-item .q { font-weight: 700; color: #3a5a4e; margin-bottom: 4px; }
+.mistake-item .a { color: #7db8a8; font-size: 12px; }
+.timer { text-align: center; font-size: 24px; font-weight: 800; color: #5a9e8a; margin: 10px 0; font-family: monospace; }
+.plan-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.plan-table th { background: #7db8a8; color: white; padding: 8px; text-align: left; }
+.plan-table td { padding: 8px; border-bottom: 1px solid #d4e8e0; background: #fff; }
+.plan-table tr:nth-child(even) td { background: #f8fcfa; }
+.plan-phase { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+.phase-1 { background: #e8f5e9; color: #2e7d32; }
+.phase-2 { background: #fff3e0; color: #ef6c00; }
+.phase-3 { background: #fce4ec; color: #c2185b; }
+.vocab-input { width: 100%; padding: 10px; border: 2px solid #d4e8e0; border-radius: 8px; font-size: 14px; margin-top: 8px; }
+.vocab-check { margin-top: 8px; padding: 8px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">🎯 目标：500分</div>
+    <div style="font-size: 38px; margin-bottom: 6px;">🚀</div>
+    <h1>四级超级控制台</h1>
+    <p>基础差？没关系，按按钮就能学 · 内置题库 · 即点即练</p>
+  </div>
+  <div class="stats">
+    <div class="stat" onclick="sp('plan')">
+      <div class="stat-num" id="stat-days">~95天</div>
+      <div class="stat-label">距12月考试</div>
+    </div>
+    <div class="stat" onclick="sp('vocab')">
+      <div class="stat-num" id="stat-learned">0</div>
+      <div class="stat-label">已学词汇</div>
+    </div>
+    <div class="stat" onclick="sp('real')">
+      <div class="stat-num" id="stat-done">0</div>
+      <div class="stat-label">已完成题</div>
+    </div>
+    <div class="stat" onclick="sp('vocab')">
+      <div class="stat-num" id="stat-accuracy">--</div>
+      <div class="stat-label">正确率</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <div class="nav-grid nav-grid-7">
+      <button class="nav-btn active" onclick="sp('vocab')" id="nav-vocab"><div class="icon">📖</div><div class="label">词汇</div></button>
+      <button class="nav-btn" onclick="sp('highfreq')" id="nav-highfreq"><div class="icon">🔥</div><div class="label">高频词</div></button>
+      <button class="nav-btn" onclick="sp('listen')" id="nav-listen"><div class="icon">🎧</div><div class="label">听力</div></button>
+      <button class="nav-btn" onclick="sp('grammar')" id="nav-grammar"><div class="icon">🔧</div><div class="label">语法</div></button>
+      <button class="nav-btn" onclick="sp('trans')" id="nav-trans"><div class="icon">📝</div><div class="label">翻译</div></button>
+      <button class="nav-btn" onclick="sp('writing')" id="nav-writing"><div class="icon">✍️</div><div class="label">写作</div></button>
+      <button class="nav-btn" onclick="sp('speak')" id="nav-speak"><div class="icon">🗣️</div><div class="label">口语</div></button>
+    </div>
+  </div>
+  <div class="nav-row2">
+    <div class="nav-grid nav-grid-6">
+      <button class="nav-btn" onclick="sp('culture')" id="nav-culture"><div class="icon">🏮</div><div class="label">中国文化</div></button>
+      <button class="nav-btn" onclick="sp('hot')" id="nav-hot"><div class="icon">🔥</div><div class="label">热门考点</div></button>
+      <button class="nav-btn" onclick="sp('real')" id="nav-real"><div class="icon">📚</div><div class="label">真题模拟</div></button>
+      <button class="nav-btn" onclick="sp('mock')" id="nav-mock"><div class="icon">📒</div><div class="label">错题本</div></button>
+      <button class="nav-btn" onclick="sp('news')" id="nav-news"><div class="icon">📰</div><div class="label">实时资讯</div></button>
+      <button class="nav-btn" onclick="sp('plan')" id="nav-plan"><div class="icon">🗓️</div><div class="label">规划</div></button>
+    </div>
+  </div>
+
+  <!-- VOCAB -->
+  <div class="panel active" id="panel-vocab">
+    <div class="card" style="background: linear-gradient(135deg, #e8f4f0 0%, #d4ece4 100%);">
+      <div class="card-header"><span style="font-size:18px;">📖</span><span class="card-title">词汇训练</span><span class="card-badge">200核心词</span></div>
+      <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 内置四级核心词汇库，随机抽考。答错会自动加入错题本！</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startVocab('cn2en')"><div class="icon">🎧</div><div class="title">中→英听写</div><div class="desc">看中文写英文</div></button>
+        <button class="action-btn" onclick="startVocab('en2cn')"><div class="icon">✏️</div><div class="title">英→中默写</div><div class="desc">看英文选中文</div></button>
+        <button class="action-btn" onclick="startVocab('flash')"><div class="icon">🃏</div><div class="title">闪卡速记</div><div class="desc">点卡片看答案</div></button>
+        <button class="action-btn" onclick="startVocab('new10')"><div class="icon">🆕</div><div class="title">今日新词</div><div class="desc">随机10个带例句</div></button>
+      </div>
+      <div id="vocab-workspace"></div>
+    </div>
+  </div>
+
+  <!-- HIGHFREQ -->
+  <div class="panel" id="panel-highfreq">
+    <div class="card" style="background: linear-gradient(135deg, #f0ece8 0%, #e4dcd4 100%);">
+      <div class="card-header"><span style="font-size:18px;">🔥</span><span class="card-title">高频词特训</span><span class="card-badge" style="background:#c49a7a;">必考词组</span></div>
+      <div class="tip" style="background:rgba(196,154,122,0.08);border-color:#c49a7a;color:#a07858;">💡 这50个高频词组在历年真题中出现频率最高，优先搞定它们！</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startHighfreq('phrase')"><div class="icon">🔗</div><div class="title">高频词组</div><div class="desc">take up/put off等</div></button>
+        <button class="action-btn" onclick="startHighfreq('word')"><div class="icon">📜</div><div class="title">高频词汇</div><div class="desc">真题语境中记</div></button>
+      </div>
+      <div id="highfreq-workspace"></div>
+    </div>
+  </div>
+
+  <!-- LISTEN -->
+  <div class="panel" id="panel-listen">
+    <div class="card" style="background: linear-gradient(135deg, #e0f0ec 0%, #d0e8e0 100%);">
+      <div class="card-header"><span style="font-size:18px;">🎧</span><span class="card-title">听力训练</span><span class="card-badge" style="background:#6aaa9a;">文本模式</span></div>
+      <div class="tip" style="background:rgba(106,170,154,0.08);border-color:#6aaa9a;color:#4a8a7a;">💡 由于浏览器无法播放音频，提供「文本听力」模式：阅读原文后作答，重点训练抓关键词和同义替换。</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startListen('news')"><div class="icon">📰</div><div class="title">短篇新闻</div><div class="desc">News Report</div></button>
+        <button class="action-btn" onclick="startListen('dialog')"><div class="icon">💬</div><div class="title">长对话</div><div class="desc">Long Conversation</div></button>
+        <button class="action-btn" onclick="startListen('passage')"><div class="icon">📖</div><div class="title">听力篇章</div><div class="desc">Passage</div></button>
+        <button class="action-btn" onclick="startListen('jinglei')"><div class="icon">🔬</div><div class="title">精听填空</div><div class="desc">逐句挖空听写</div></button>
+      </div>
+      <div id="listen-workspace"></div>
+    </div>
+  </div>
+
+  <!-- GRAMMAR -->
+  <div class="panel" id="panel-grammar">
+    <div class="card" style="background: linear-gradient(135deg, #f0f0e8 0%, #e4e4dc 100%);">
+      <div class="card-header"><span style="font-size:18px;">🔧</span><span class="card-title">语法训练</span><span class="card-badge" style="background:#a8a080;">20道陷阱题</span></div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startGrammar('diag')"><div class="icon">🩺</div><div class="title">语法诊断</div><div class="desc">10道陷阱题测薄弱点</div></button>
+        <button class="action-btn" onclick="startGrammar('all')"><div class="icon">📚</div><div class="title">全部语法题</div><div class="desc">20道逐题突破</div></button>
+      </div>
+      <div id="grammar-workspace"></div>
+    </div>
+  </div>
+
+  <!-- TRANS -->
+  <div class="panel" id="panel-trans">
+    <div class="card" style="background: linear-gradient(135deg, #e8f4ec 0%, #dcede0 100%);">
+      <div class="card-header"><span style="font-size:18px;">📝</span><span class="card-title">翻译训练</span><span class="card-badge">8道真题</span></div>
+      <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 输入你的译文，系统会对照关键词给你打分，并展示满分范文。</div>
+      <div class="btn-grid btn-grid-1">
+        <button class="action-btn-row" onclick="startTrans()"><div class="icon">📋</div><div><div class="title">开始翻译练习</div><div class="desc">随机抽取1道四级翻译真题，限时15分钟</div></div></button>
+      </div>
+      <div id="trans-workspace"></div>
+    </div>
+  </div>
+
+  <!-- WRITING -->
+  <div class="panel" id="panel-writing">
+    <div class="card" style="background: linear-gradient(135deg, #f4f0e8 0%, #ece8dc 100%);">
+      <div class="card-header"><span style="font-size:18px;">✍️</span><span class="card-title">写作训练</span><span class="card-badge" style="background:#a8a080;">4道预测题</span></div>
+      <div class="btn-grid btn-grid-1">
+        <button class="action-btn-row" onclick="startWriting()"><div class="icon">📝</div><div><div class="title">开始写作练习</div><div class="desc">随机抽取1道写作题，输入作文后对照范文自评</div></div></button>
+        <button class="action-btn-row" onclick="showTemplate()"><div class="icon">📄</div><div><div class="title">万能模板</div><div class="desc">直接查看高分议论文框架+替换词</div></div></button>
+      </div>
+      <div id="writing-workspace"></div>
+    </div>
+  </div>
+
+  <!-- SPEAK -->
+  <div class="panel" id="panel-speak">
+    <div class="card" style="background: linear-gradient(135deg, #e8f0f4 0%, #dce8ec 100%);">
+      <div class="card-header"><span style="font-size:18px;">🗣️</span><span class="card-title">口语训练</span><span class="card-badge" style="background:#7a9ea8;">IELTS Style</span></div>
+      <div class="tip" style="background:rgba(122,158,168,0.08);border-color:#7a9ea8;color:#5a7e88;">💡 口语部分提供话题卡和地道表达积累，你可以对着镜子练习，然后对照范文检查。</div>
+      <div class="btn-grid btn-grid-1">
+        <button class="action-btn-row" onclick="startSpeak('part1')"><div class="icon">💬</div><div><div class="title">Part 1 · 日常问答</div><div class="desc">随机日常话题，附地道回答范文</div></div></button>
+        <button class="action-btn-row" onclick="startSpeak('part2')"><div class="icon">🎴</div><div><div class="title">Part 2 · 话题卡陈述</div><div class="desc">抽话题卡，准备1分钟，说1-2分钟</div></div></button>
+        <button class="action-btn-row" onclick="startSpeak('expressions')"><div class="icon">🌟</div><div><div class="title">地道表达积累</div><div class="desc">10个加分句型，直接背诵</div></div></button>
+      </div>
+      <div id="speak-workspace"></div>
+    </div>
+  </div>
+
+  <!-- CULTURE -->
+  <div class="panel" id="panel-culture">
+    <div class="card" style="background: linear-gradient(135deg, #f4e8e0 0%, #ecdcd0 100%);">
+      <div class="card-header"><span style="font-size:18px;">🏮</span><span class="card-title">中国文化概况</span><span class="card-badge" style="background:#c4907a;">翻译必考</span></div>
+      <div class="tip" style="background:rgba(196,144,122,0.08);border-color:#c4907a;color:#a07058;">💡 四级翻译超爱考中国文化！40个专属词汇+真题句型，必须背熟。</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startCulture('flash')"><div class="icon">📚</div><div class="title">文化词汇闪卡</div><div class="desc">40个必背词汇</div></button>
+        <button class="action-btn" onclick="startCulture('trans')"><div class="icon">📝</div><div class="title">文化段落翻译</div><div class="desc">中→英实战</div></button>
+        <button class="action-btn" onclick="startCulture('sentence')"><div class="icon">📜</div><div class="title">万能句型</div><div class="desc">"有着悠久的历史"等</div></button>
+        <button class="action-btn" onclick="startCulture('quiz')"><div class="icon">🎓</div><div class="title">文化常识问答</div><div class="desc">背景知识题</div></button>
+      </div>
+      <div id="culture-workspace"></div>
+    </div>
+  </div>
+
+  <!-- HOT -->
+  <div class="panel" id="panel-hot">
+    <div class="card" style="background: linear-gradient(135deg, #f0e8e8 0%, #e4dcdc 100%);">
+      <div class="card-header"><span style="font-size:18px;">🔥</span><span class="card-title">热门考点专题</span><span class="card-badge" style="background:#b87878;">6大领域</span></div>
+      <div class="tip" style="background:rgba(184,120,120,0.08);border-color:#b87878;color:#985858;">💡 每个专题包含核心词汇+相关翻译练习，考前重点突破！</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startHot('tech')"><div class="icon">📱</div><div class="title">科技数码</div><div class="desc">AI/5G/互联网</div></button>
+        <button class="action-btn" onclick="startHot('env')"><div class="icon">🌱</div><div class="title">环保生态</div><div class="desc">碳中和/新能源</div></button>
+        <button class="action-btn" onclick="startHot('edu')"><div class="icon">📚</div><div class="title">教育学习</div><div class="desc">在线教育/考研</div></button>
+        <button class="action-btn" onclick="startHot('social')"><div class="icon">🏘️</div><div class="title">社会民生</div><div class="desc">老龄化/就业</div></button>
+        <button class="action-btn" onclick="startHot('econ')"><div class="icon">💹</div><div class="title">经济发展</div><div class="desc">数字经济/共享</div></button>
+        <button class="action-btn" onclick="startHot('health')"><div class="icon">💪</div><div class="title">健康医疗</div><div class="desc">运动/医保/养生</div></button>
+      </div>
+      <button class="dashed-btn" style="border-color:#b87878;background:rgba(184,120,120,0.05);color:#985858;" onclick="startHot('random')">🎲 随机热门专题</button>
+      <div id="hot-workspace"></div>
+    </div>
+  </div>
+
+  <!-- REAL / MOCK TEST -->
+  <div class="panel" id="panel-real">
+    <div class="card" style="background: linear-gradient(135deg, #e8f4e8 0%, #dceddc 100%);">
+      <div class="card-header"><span style="font-size:18px;">📚</span><span class="card-title">真题模拟</span><span class="card-badge">综合训练</span></div>
+      <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 模拟真实考试节奏，做完系统自动算分！</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="startMock('read')"><div class="icon">📖</div><div class="title">阅读模拟</div><div class="desc">选词+匹配+仔细阅读</div></button>
+        <button class="action-btn" onclick="startMock('listen')"><div class="icon">🎧</div><div class="title">听力模拟</div><div class="desc">完整1套文本听力</div></button>
+        <button class="action-btn" onclick="startMock('full')"><div class="icon">📝</div><div class="title">全套模拟</div><div class="desc">阅读+翻译+写作</div></button>
+        <button class="action-btn" onclick="startMock('word')"><div class="icon">🔤</div><div class="title">词汇模考</div><div class="desc">50词大闯关</div></button>
+      </div>
+      <div id="mock-workspace"></div>
+    </div>
+  </div>
+
+  <!-- MISTAKE BOOK -->
+  <div class="panel" id="panel-mock">
+    <div class="card" style="background: linear-gradient(135deg, #f4f0e8 0%, #ece8dc 100%);">
+      <div class="card-header"><span style="font-size:18px;">📒</span><span class="card-title">错题本</span><span class="card-badge" style="background:#a8a080;">自动记录</span></div>
+      <div class="tip" style="background:rgba(168,160,128,0.08);border-color:#a8a080;color:#8a8060;">💡 你在词汇、语法、听力中做错的题都会自动保存在这里，考前必看！</div>
+      <div class="btn-grid btn-grid-2">
+        <button class="action-btn" onclick="showMistakes('all')"><div class="icon">📋</div><div class="title">全部错题</div><div class="desc">查看所有记录</div></button>
+        <button class="action-btn" onclick="showMistakes('redo')"><div class="icon">🔄</div><div class="title">错题重练</div><div class="desc">随机抽错题考你</div></button>
+      </div>
+      <div id="mistake-workspace"></div>
+    </div>
+  </div>
+
+  <!-- NEWS -->
+  <div class="panel" id="panel-news">
+    <div class="card" style="background: linear-gradient(135deg, #e0f0f4 0%, #d0e8ec 100%);">
+      <div class="card-header"><span style="font-size:18px;">📰</span><span class="card-title">四级实时资讯</span><span class="card-badge" style="background:#7a9ea8;">2026年12月</span></div>
+      <div class="tip" style="background:rgba(122,158,168,0.08);border-color:#7a9ea8;color:#5a7e88;">💡 以下是根据历年规律整理的2026年12月考试关键信息（实际请以官网通知为准）。</div>
+      <div style="background:#fff; border-radius:10px; padding:14px; margin-top:10px;">
+        <h4 style="color:#4a6b5e; margin-bottom:10px; font-size:14px;">⏰ 关键时间节点</h4>
+        <div style="font-size:12px; line-height:2; color:#5a7a6e;">
+          <div>📅 <b>报名时间：</b>2026年9月中旬（预计9月15日-25日）</div>
+          <div>🖨️ <b>准考证打印：</b>2026年12月初（考前一周）</div>
+          <div>📝 <b>笔试时间：</b>2026年12月19日（周六）上午 9:00-11:20</div>
+          <div>📊 <b>成绩查询：</b>2027年2月底</div>
+        </div>
+        <h4 style="color:#4a6b5e; margin:14px 0 10px 0; font-size:14px;">📝 考试基本信息</h4>
+        <div style="font-size:12px; line-height:2; color:#5a7a6e;">
+          <div>• 总分710分，425分及格，你的目标是500分！</div>
+          <div>• 听力（35%）+ 阅读（35%）+ 写作翻译（30%）</div>
+          <div>• 写作和翻译是人工阅卷，字迹工整有印象分</div>
+          <div>• 听力只放一遍，一定要提前预读选项！</div>
+        </div>
+        <h4 style="color:#4a6b5e; margin:14px 0 10px 0; font-size:14px;">🔥 2026年热点预测</h4>
+        <div style="font-size:12px; line-height:2; color:#5a7a6e;">
+          <div>• 翻译：人工智能与生活、新能源汽车、乡村振兴、传统节日（端午/中秋）</div>
+          <div>• 写作：网络学习、环境保护、大学生就业、心理健康、传统文化传承</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="panel" id="panel-plan">
+    <div class="card" style="background: linear-gradient(135deg, #f0e8f4 0%, #e8dce8 100%);">
+      <div class="card-header"><span style="font-size:18px;">🗓️</span><span class="card-title">备考规划</span><span class="card-badge" style="background:#a08aaa;">500分策略</span></div>
+      <div class="btn-grid btn-grid-1">
+        <button class="action-btn-row" onclick="showTodayPlan()"><div class="icon">📅</div><div><div class="title">今日任务</div><div class="desc">根据剩余天数生成今天的精确作战表</div></div></button>
+        <button class="action-btn-row" onclick="showFullPlan()"><div class="icon">🗺️</div><div><div class="title">总规划表</div><div class="desc">从现在到考前的周计划表</div></div></button>
+      </div>
+      <div class="tip" style="background:rgba(160,138,170,0.08);border-color:#a08aaa;color:#7a6a8a;margin-top:10px;">
+        <div style="font-weight:700; margin-bottom:6px;">💡 500分得分策略参考</div>
+        <div style="line-height:1.8;">听力170 + 阅读170 + 写译160 = 500。均衡发展最稳，不要偏科！</div>
+      </div>
+      <div id="plan-workspace"></div>
+    </div>
+  </div>
+
+  <div class="footer"><p>💡 一次只练一个模块，做完再换。你的错题本会自动保存到浏览器本地哦~</p></div>
+</div>
+
+<script>
+// ==================== 数据库 ====================
+const vocabDB = [
+{w:"abandon",m:"放弃，抛弃",p:"v",e:"He abandoned his car in the snow."},
+{w:"ability",m:"能力，才能",p:"n",e:"She has the ability to solve problems."},
+{w:"absence",m:"缺席，缺乏",p:"n",e:"His absence from school was noticed."},
+{w:"absolute",m:"绝对的，完全的",p:"adj",e:"I have absolute confidence in you."},
+{w:"absorb",m:"吸收，吸引",p:"v",e:"Plants absorb sunlight."},
+{w:"abstract",m:"抽象的",p:"adj",e:"This painting is very abstract."},
+{w:"abundant",m:"丰富的，充裕的",p:"adj",e:"The region has abundant rainfall."},
+{w:"academic",m:"学术的，理论的",p:"adj",e:"She has a strong academic background."},
+{w:"accelerate",m:"加速，促进",p:"v",e:"The car accelerated down the hill."},
+{w:"access",m:"进入，使用权",p:"n/v",e:"Students have access to the library."},
+{w:"accompany",m:"陪伴，伴随",p:"v",e:"She accompanied me to the hospital."},
+{w:"accomplish",m:"完成，实现",p:"v",e:"We accomplished our mission."},
+{w:"account",m:"账户，解释",p:"n",e:"I opened a bank account."},
+{w:"accumulate",m:"积累，积聚",p:"v",e:"Dust accumulated on the books."},
+{w:"accurate",m:"精确的，准确的",p:"adj",e:"The report is accurate and detailed."},
+{w:"accuse",m:"控告，指责",p:"v",e:"He was accused of stealing."},
+{w:"accustomed",m:"习惯的",p:"adj",e:"I am accustomed to getting up early."},
+{w:"achieve",m:"达到，实现",p:"v",e:"She achieved her goal of becoming a doctor."},
+{w:"acknowledge",m:"承认，致谢",p:"v",e:"He acknowledged his mistake."},
+{w:"acquire",m:"获得，学到",p:"v",e:"She acquired a new skill."},
+{w:"adequate",m:"足够的，适当的",p:"adj",e:"The food was adequate for six people."},
+{w:"adjust",m:"调整，适应",p:"v",e:"It took time to adjust to college life."},
+{w:"admire",m:"钦佩，赞赏",p:"v",e:"I admire her courage."},
+{w:"admit",m:"承认，准许进入",p:"v",e:"He admitted breaking the window."},
+{w:"adopt",m:"采用，收养",p:"v",e:"They decided to adopt a child."},
+{w:"advance",m:"前进，提前",p:"n/v",e:"Medical science has made great advances."},
+{w:"advantage",m:"优势，好处",p:"n",e:"Her experience gives her an advantage."},
+{w:"advertise",m:"做广告，宣传",p:"v",e:"We advertised the job in the paper."},
+{w:"advocate",m:"提倡，拥护",p:"v/n",e:"She advocates for human rights."},
+{w:"affect",m:"影响，感动",p:"v",e:"The weather affected our plans."},
+{w:"afford",m:"负担得起，提供",p:"v",e:"I can't afford a new car."},
+{w:"agenda",m:"议程，日程",p:"n",e:"What is the agenda for today?"},
+{w:"aggressive",m:"侵略的，有进取心的",p:"adj",e:"Dogs can be aggressive."},
+{w:"agriculture",m:"农业，农学",p:"n",e:"Agriculture is the main industry here."},
+{w:"alarm",m:"警报，惊慌",p:"n/v",e:"The fire alarm went off."},
+{w:"alcohol",m:"酒精，酒",p:"n",e:"He doesn't drink alcohol."},
+{w:"alert",m:"警觉的，警惕",p:"adj/n",e:"The police issued an alert."},
+{w:"allocate",m:"分配，配置",p:"v",e:"We need to allocate more funds."},
+{w:"allow",m:"允许，给予",p:"v",e:"Pets are not allowed in the building."},
+{w:"alter",m:"改变，修改",p:"v",e:"The dress was too long, so I altered it."},
+{w:"alternative",m:"替代的，选择",p:"adj/n",e:"We have no alternative but to wait."},
+{w:"amateur",m:"业余的，爱好者",p:"adj/n",e:"He is an amateur photographer."},
+{w:"ambition",m:"雄心，抱负",p:"n",e:"Her ambition is to become a pilot."},
+{w:"ambitious",m:"有雄心的，野心勃勃的",p:"adj",e:"He is ambitious and hardworking."},
+{w:"amend",m:"修改，改进",p:"v",e:"The law was amended last year."},
+{w:"ample",m:"充足的，丰富的",p:"adj",e:"There is ample evidence to support this."},
+{w:"amuse",m:"娱乐，使发笑",p:"v",e:"His jokes amused everyone."},
+{w:"analyze",m:"分析，分解",p:"v",e:"We need to analyze the data carefully."},
+{w:"ancestor",m:"祖先，祖宗",p:"n",e:"My ancestors came from Italy."},
+{w:"anniversary",m:"周年纪念日",p:"n",e:"We celebrated our 10th wedding anniversary."},
+{w:"announce",m:"宣布，通告",p:"v",e:"They announced their engagement."},
+{w:"annoy",m:"惹恼，打扰",p:"v",e:"It annoys me when you chew loudly."},
+{w:"annual",m:"年度的，每年的",p:"adj",e:"The company holds an annual meeting."},
+{w:"anticipate",m:"预期，期望",p:"v",e:"We anticipate a large crowd at the concert."},
+{w:"anxiety",m:"焦虑，渴望",p:"n",e:"She felt anxiety before the exam."},
+{w:"apologize",m:"道歉",p:"v",e:"I apologize for being late."},
+{w:"apparent",m:"明显的，表面上的",p:"adj",e:"It was apparent that he was lying."},
+{w:"appeal",m:"呼吁，吸引力",p:"n/v",e:"The idea has great appeal."},
+{w:"appetite",m:"食欲，欲望",p:"n",e:"I have no appetite today."},
+{w:"applaud",m:"鼓掌，称赞",p:"v",e:"The audience applauded loudly."},
+{w:"applicant",m:"申请人",p:"n",e:"There were over 100 applicants for the job."},
+{w:"appoint",m:"任命，约定",p:"v",e:"They appointed him as manager."},
+{w:"appreciate",m:"欣赏，感激",p:"v",e:"I really appreciate your help."},
+{w:"approach",m:"接近，方法",p:"v/n",e:"We need a new approach to this problem."},
+{w:"appropriate",m:"适当的",p:"adj",e:"Please wear appropriate clothing."},
+{w:"approve",m:"批准，赞成",p:"v",e:"The committee approved the plan."},
+{w:"approximate",m:"近似的",p:"adj",e:"The approximate cost is $500."},
+{w:"arbitrary",m:"任意的，武断的",p:"adj",e:"The choice was quite arbitrary."},
+{w:"argue",m:"争论，主张",p:"v",e:"They argued about money again."},
+{w:"arise",m:"出现，上升",p:"v",e:"Problems arose during the project."},
+{w:"arouse",m:"唤醒，激起",p:"v",e:"The speech aroused public concern."},
+{w:"arrange",m:"安排，整理",p:"v",e:"I'll arrange a meeting for next week."},
+{w:"arrest",m:"逮捕，阻止",p:"v/n",e:"The police made several arrests."},
+{w:"artificial",m:"人造的，虚假的",p:"adj",e:"This drink contains artificial sweeteners."},
+{w:"ashamed",m:"惭愧的，羞耻的",p:"adj",e:"You should be ashamed of yourself."},
+{w:"aspect",m:"方面，外观",p:"n",e:"We need to consider every aspect."},
+{w:"assemble",m:"集合，组装",p:"v",e:"The workers assemble cars in the factory."},
+{w:"assess",m:"评估，评定",p:"v",e:"We need to assess the damage."},
+{w:"assign",m:"分配，指派",p:"v",e:"I was assigned to the marketing team."},
+{w:"assist",m:"协助，帮助",p:"v",e:"She assisted him with his homework."},
+{w:"associate",m:"联系，交往",p:"v/n",e:"I associate summer with swimming."},
+{w:"assume",m:"假设，承担",p:"v",e:"I assume you have heard the news."},
+{w:"assure",m:"保证，确信",p:"v",e:"I assure you that it is safe."},
+{w:"astonish",m:"使惊讶",p:"v",e:"The news astonished everyone."},
+{w:"athlete",m:"运动员",p:"n",e:"She is a professional athlete."},
+{w:"atmosphere",m:"大气，气氛",p:"n",e:"The atmosphere in the room was tense."},
+{w:"attach",m:"附上，贴上",p:"v",e:"Please attach your photo to the form."},
+{w:"attempt",m:"尝试，企图",p:"n/v",e:"He made an attempt to escape."},
+{w:"attend",m:"参加，照顾",p:"v",e:"I attended the conference last week."},
+{w:"attitude",m:"态度，看法",p:"n",e:"Your attitude determines your success."},
+{w:"attract",m:"吸引，引起",p:"v",e:"The bright colors attract children."},
+{w:"authority",m:"权威，当局",p:"n",e:"The authorities are investigating."},
+{w:"automatic",m:"自动的",p:"adj",e:"The door is automatic."},
+{w:"available",m:"可获得的，有空的",p:"adj",e:"Tickets are available online."},
+{w:"aware",m:"意识到的",p:"adj",e:"Are you aware of the problem?"},
+{w:"awful",m:"糟糕的，可怕的",p:"adj",e:"The weather was awful yesterday."},
+{w:"awkward",m:"尴尬的，笨拙的",p:"adj",e:"There was an awkward silence."},
+{w:"background",m:"背景，经历",p:"n",e:"She has a background in science."},
+{w:"balance",m:"平衡，余额",p:"n/v",e:"You need to balance work and life."},
+{w:"ban",m:"禁止，禁令",p:"v/n",e:"Smoking is banned in this area."},
+{w:"barely",m:"几乎不，仅仅",p:"adv",e:"I barely had time to eat."},
+{w:"bargain",m:"交易，便宜货",p:"n/v",e:"This shirt was a real bargain."},
+{w:"barrier",m:"障碍，栅栏",p:"n",e:"Language is a barrier to communication."},
+{w:"basis",m:"基础，根据",p:"n",e:"We meet on a regular basis."},
+{w:"behave",m:"表现，举止",p:"v",e:"Children should behave themselves."},
+{w:"belong",m:"属于，适合",p:"v",e:"This book belongs to the library."},
+{w:"benefit",m:"利益，好处",p:"n/v",e:"Exercise has many health benefits."},
+{w:"betray",m:"背叛，泄露",p:"v",e:"He betrayed his friend's secret."},
+{w:"beyond",m:"超过，在远处",p:"prep",e:"The problem is beyond my control."},
+{w:"blame",m:"责备，责任",p:"v/n",e:"Don't blame me for your mistakes."},
+{w:"blank",m:"空白的，空虚的",p:"adj/n",e:"Please fill in the blank spaces."},
+{w:"blend",m:"混合，融合",p:"v/n",e:"The tea is a blend of several varieties."},
+{w:"block",m:"街区，阻挡",p:"n/v",e:"A truck blocked the road."},
+{w:"bloom",m:"开花，兴旺",p:"v/n",e:"The roses are in full bloom."},
+{w:"blur",m:"模糊，污点",p:"n/v",e:"The photo came out blurry."},
+{w:"boast",m:"自夸，拥有",p:"v",e:"The city boasts many museums."},
+{w:"bold",m:"大胆的，粗体的",p:"adj",e:"He made a bold decision."},
+{w:"border",m:"边界，边境",p:"n",e:"We crossed the border into Canada."},
+{w:"bore",m:"使厌烦，钻孔",p:"v",e:"His speech bored the audience."},
+{w:"bother",m:"打扰，麻烦",p:"v",e:"Sorry to bother you, but..."},
+{w:"bound",m:"必然的，界限",p:"adj/n",e:"You're bound to feel nervous."},
+{w:"brand",m:"品牌，商标",p:"n",e:"What brand of coffee do you prefer?"},
+{w:"breed",m:"繁殖，培育",p:"v/n",e:"Rabbits breed quickly."},
+{w:"brief",m:"简短的，摘要",p:"adj/n",e:"Please keep your speech brief."},
+{w:"brilliant",m:"杰出的，灿烂的",p:"adj",e:"She had a brilliant idea."},
+{w:"broadcast",m:"广播，传播",p:"v/n",e:"The interview was broadcast live."},
+{w:"budget",m:"预算",p:"n/v",e:"We need to stay within budget."},
+{w:"burden",m:"负担，责任",p:"n/v",e:"Taxes are a burden on business."},
+{w:"bureau",m:"局，办事处",p:"n",e:"I need to go to the credit bureau."},
+{w:"burst",m:"爆发，破裂",p:"v/n",e:"The pipe burst and water went everywhere."},
+{w:"cable",m:"电缆，电报",p:"n",e:"We need to lay new cables."},
+{w:"calculate",m:"计算，估计",p:"v",e:"I need to calculate the total cost."},
+{w:"campaign",m:"运动，战役",p:"n",e:"They launched an advertising campaign."},
+{w:"cancel",m:"取消，作废",p:"v",e:"The meeting was cancelled."},
+{w:"candidate",m:"候选人，考生",p:"n",e:"There are three candidates for the job."},
+{w:"capable",m:"有能力的",p:"adj",e:"She is capable of doing the job."},
+{w:"capacity",m:"容量，能力",p:"n",e:"The stadium has a capacity of 50,000."},
+{w:"capture",m:"捕获，捕捉",p:"v",e:"The police finally captured the thief."},
+{w:"career",m:"职业，事业",p:"n",e:"She has had a successful career."},
+{w:"casual",m:"随便的，偶然的",p:"adj",e:"The office has a casual dress code."},
+{w:"category",m:"类别，范畴",p:"n",e:"The books are divided into categories."},
+{w:"cautious",m:"谨慎的，小心的",p:"adj",e:"Be cautious when crossing the street."},
+{w:"cease",m:"停止，终止",p:"v",e:"The factory ceased production."},
+{w:"celebrate",m:"庆祝，颂扬",p:"v",e:"We celebrated her birthday."},
+{w:"certificate",m:"证书，执照",p:"n",e:"You need a birth certificate."},
+{w:"challenge",m:"挑战，质疑",p:"n/v",e:"Learning Chinese is a real challenge."},
+{w:"champion",m:"冠军，拥护者",p:"n",e:"She is the world champion."},
+{w:"channel",m:"频道，渠道",p:"n",e:"Change the channel, please."},
+{w:"chaos",m:"混乱，无秩序",p:"n",e:"The traffic was in chaos."},
+{w:"character",m:"性格，角色，汉字",p:"n",e:"He has a strong character."},
+{w:"charge",m:"收费，指控",p:"v/n",e:"They charge $5 for delivery."},
+{w:"charity",m:"慈善，施舍",p:"n",e:"She donates money to charity."},
+{w:"charm",m:"魅力，吸引力",p:"n/v",e:"He has a lot of charm."},
+{w:"chart",m:"图表，海图",p:"n",e:"Look at the chart on the wall."},
+{w:"chase",m:"追逐，追求",p:"v/n",e:"The dog chased the cat."},
+{w:"cheat",m:"欺骗，作弊",p:"v/n",e:"He was caught cheating on the exam."},
+{w:"cheer",m:"欢呼，愉快",p:"v/n",e:"The crowd cheered loudly."},
+{w:"chemical",m:"化学的，化学品",p:"adj/n",e:"The chemical reaction was fast."},
+{w:"cherish",m:"珍惜，怀有",p:"v",e:"I cherish the time we spent together."},
+{w:"chief",m:"主要的，首领",p:"adj/n",e:"The chief reason is cost."},
+{w:"choke",m:"窒息，堵塞",p:"v",e:"He choked on a piece of bread."},
+{w:"circumstance",m:"环境，情况",p:"n",e:"Under normal circumstances, I would agree."},
+{w:"cite",m:"引用，传唤",p:"v",e:"She cited three reasons for her decision."},
+{w:"citizen",m:"公民，市民",p:"n",e:"Every citizen has rights and duties."},
+{w:"civil",m:"公民的，文明的",p:"adj",e:"We must maintain civil behavior."},
+{w:"claim",m:"声称，索赔",p:"v/n",e:"He claims to have seen a UFO."},
+{w:"clarify",m:"澄清，阐明",p:"v",e:"Could you clarify your statement?"},
+{w:"classify",m:"分类，分等",p:"v",e:"Books are classified by subject."},
+{w:"client",m:"客户，委托人",p:"n",e:"We have over 100 regular clients."},
+{w:"climate",m:"气候，风气",p:"n",e:"The climate here is mild."},
+{w:"clue",m:"线索，提示",p:"n",e:"The detective found a clue."},
+{w:"clumsy",m:"笨拙的，不得体的",p:"adj",e:"I'm clumsy with chopsticks."},
+{w:"coach",m:"教练，长途汽车",p:"n/v",e:"He coaches the basketball team."},
+{w:"code",m:"代码，密码",p:"n",e:"What's the area code for Beijing?"},
+{w:"collapse",m:"倒塌，崩溃",p:"v/n",e:"The roof collapsed under the snow."},
+{w:"colleague",m:"同事",p:"n",e:"She is a colleague of mine."},
+{w:"collect",m:"收集，领取",p:"v",e:"I collect stamps as a hobby."},
+{w:"collision",m:"碰撞，冲突",p:"n",e:"The car was damaged in the collision."},
+{w:"combine",m:"结合，联合",p:"v",e:"Combine the flour and water."},
+{w:"comedy",m:"喜剧，滑稽",p:"n",e:"The movie is a romantic comedy."},
+{w:"comfort",m:"安慰，舒适",p:"n/v",e:"The news brought her comfort."},
+{w:"command",m:"命令，掌握",p:"n/v",e:"He has command of three languages."},
+{w:"comment",m:"评论，意见",p:"n/v",e:"No comment!"},
+{w:"commerce",m:"商业，贸易",p:"n",e:"E-commerce is growing rapidly."},
+{w:"commit",m:"承诺，犯罪",p:"v",e:"He committed himself to the project."},
+{w:"communicate",m:"交流，传达",p:"v",e:"We communicate by email."},
+{w:"community",m:"社区，团体",p:"n",e:"We live in a close community."},
+{w:"compare",m:"比较，比喻",p:"v",e:"Compare this with that."},
+{w:"compete",m:"竞争，比赛",p:"v",e:"We can't compete with their prices."},
+{w:"competent",m:"有能力的，胜任的",p:"adj",e:"She is competent at her job."},
+{w:"competition",m:"竞争，比赛",p:"n",e:"The competition is fierce."},
+{w:"complain",m:"抱怨，投诉",p:"v",e:"She complained about the noise."},
+{w:"complete",m:"完成，完全的",p:"v/adj",e:"The project is now complete."},
+{w:"complex",m:"复杂的，综合体",p:"adj/n",e:"The issue is more complex than it seems."},
+{w:"complicated",m:"复杂的，难懂的",p:"adj",e:"The instructions are complicated."},
+{w:"component",m:"组成部分，元件",p:"n",e:"Each component must be tested."},
+{w:"compose",m:"组成，创作",p:"v",e:"The committee is composed of ten members."},
+{w:"comprehensive",m:"全面的，综合的",p:"adj",e:"We offer comprehensive insurance."},
+{w:"comprise",m:"包含，由...组成",p:"v",e:"The team comprises five engineers."},
+{w:"compromise",m:"妥协，折中",p:"n/v",e:"We need to reach a compromise."},
+{w:"compulsory",m:"强制的，义务的",p:"adj",e:"Education is compulsory until age 16."},
+{w:"conceal",m:"隐藏，隐瞒",p:"v",e:"He tried to conceal his identity."},
+{w:"concentrate",m:"集中，浓缩",p:"v",e:"I need to concentrate on my work."},
+{w:"concept",m:"概念，观念",p:"n",e:"The concept of time is abstract."},
+{w:"concern",m:"关心，担忧",p:"n/v",e:"Environmental concerns are growing."},
+{w:"conclude",m:"结论，结束",p:"v",e:"We concluded that he was wrong."},
+{w:"concrete",m:"具体的，混凝土",p:"adj/n",e:"Give me a concrete example."},
+{w:"condemn",m:"谴责，判刑",p:"v",e:"The government condemned the attack."},
+{w:"condition",m:"条件，状况",p:"n",e:"The car is in good condition."},
+{w:"conduct",m:"行为，实施",p:"n/v",e:"He conducted the orchestra."},
+{w:"conference",m:"会议，讨论",p:"n",e:"The conference will be held in Beijing."},
+{w:"confess",m:"承认，忏悔",p:"v",e:"He confessed to the crime."},
+{w:"confidence",m:"信心，信任",p:"n",e:"I have confidence in your ability."},
+{w:"confine",m:"限制，禁闭",p:"v",e:"Please confine your remarks to the topic."},
+{w:"confirm",m:"确认，证实",p:"v",e:"Please confirm your reservation."},
+{w:"conflict",m:"冲突，矛盾",p:"n/v",e:"The conflict lasted for years."},
+{w:"conform",m:"遵守，符合",p:"v",e:"You must conform to the rules."},
+{w:"confront",m:"面对，对抗",p:"v",e:"We must confront this problem."},
+{w:"confuse",m:"使困惑，混淆",p:"v",e:"I always confuse him with his brother."},
+{w:"congratulate",m:"祝贺，恭喜",p:"v",e:"I congratulate you on your success."},
+{w:"congress",m:"国会，代表大会",p:"n",e:"The congress passed a new law."},
+{w:"connect",m:"连接，联系",p:"v",e:"The bridge connects the two cities."},
+{w:"conscience",m:"良心，良知",p:"n",e:"My conscience is clear."},
+{w:"conscious",m:"有意识的，自觉的",p:"adj",e:"He was conscious during the operation."},
+{w:"consent",m:"同意，准许",p:"n/v",e:"They gave their consent to the plan."},
+{w:"consequence",m:"结果，后果",p:"n",e:"You must accept the consequences."},
+{w:"conservative",m:"保守的，保守派",p:"adj/n",e:"He has conservative views."},
+{w:"consider",m:"考虑，认为",p:"v",e:"Please consider my suggestion."},
+{w:"considerable",m:"相当大的，重要的",p:"adj",e:"The project requires considerable effort."},
+{w:"consist",m:"由...组成，存在于",p:"v",e:"The team consists of five members."},
+{w:"consistent",m:"一致的，始终如一的",p:"adj",e:"Be consistent in your actions."},
+{w:"constant",m:"不断的，常数",p:"adj/n",e:"He makes constant complaints."},
+{w:"constitute",m:"组成，构成",p:"v",e:"Twelve months constitute a year."},
+{w:"construct",m:"建造，构造",p:"v",e:"They constructed a new bridge."},
+{w:"consult",m:"咨询，查阅",p:"v",e:"You should consult a doctor."},
+{w:"consume",m:"消费，消耗",p:"v",e:"This car consumes a lot of fuel."},
+{w:"contact",m:"联系，接触",p:"n/v",e:"I'll contact you tomorrow."},
+{w:"contain",m:"包含，控制",p:"v",e:"The box contains old letters."},
+{w:"contemporary",m:"当代的，同时代的",p:"adj/n",e:"She likes contemporary art."},
+{w:"contest",m:"比赛，竞争",p:"n/v",e:"She won the singing contest."},
+{w:"context",m:"上下文，背景",p:"n",e:"You need to understand the context."},
+{w:"continent",m:"大陆，洲",p:"n",e:"Africa is the second largest continent."},
+{w:"continue",m:"继续，延续",p:"v",e:"Please continue with your story."},
+{w:"contract",m:"合同，收缩",p:"n/v",e:"We signed a one-year contract."},
+{w:"contradict",m:"反驳，矛盾",p:"v",e:"The facts contradict his theory."},
+{w:"contrary",m:"相反的，反面",p:"adj/n",e:"Contrary to popular belief..."},
+{w:"contrast",m:"对比，差别",p:"n/v",e:"There is a sharp contrast between the two."},
+{w:"contribute",m:"贡献，捐献",p:"v",e:"Everyone should contribute to society."},
+{w:"controversial",m:"有争议的",p:"adj",e:"This is a controversial topic."},
+{w:"convenient",m:"方便的，便利的",p:"adj",e:"Online shopping is very convenient."},
+{w:"convention",m:"惯例，大会",p:"n",e:"By convention, north is at the top."},
+{w:"convert",m:"转换，转变",p:"v",e:"We need to convert the files."},
+{w:"convey",m:"传达，运输",p:"v",e:"I want to convey my thanks to you."},
+{w:"convince",m:"说服，使确信",p:"v",e:"He convinced me of his innocence."},
+{w:"cooperate",m:"合作，配合",p:"v",e:"We need to cooperate with each other."},
+{w:"coordinate",m:"协调，坐标",p:"v/n",e:"We need to coordinate our efforts."},
+{w:"cope",m:"应付，处理",p:"v",e:"I can't cope with all this work."},
+{w:"core",m:"核心，果心",p:"n/adj",e:"The core of the problem is money."},
+{w:"corporate",m:"公司的，团体的",p:"adj",e:"He works in the corporate sector."},
+{w:"correspond",m:"符合，通信",p:"v",e:"The two versions do not correspond."},
+{w:"costume",m:"服装，戏装",p:"n",e:"She wore a national costume."},
+{w:"council",m:"委员会，理事会",p:"n",e:"The city council meets every month."},
+{w:"counsel",m:"劝告，法律顾问",p:"n/v",e:"She sought legal counsel."},
+{w:"count",m:"数数，重要",p:"v",e:"Every vote counts."},
+{w:"counter",m:"柜台，反驳",p:"n/v",e:"Please pay at the counter."},
+{w:"courage",m:"勇气，胆量",p:"n",e:"It takes courage to admit mistakes."},
+{w:"course",m:"课程，过程",p:"n",e:"I'm taking a French course."},
+{w:"court",m:"法庭，球场",p:"n",e:"The case was settled out of court."},
+{w:"cover",m:"覆盖，封面",p:"v/n",e:"The book covers many topics."},
+{w:"crack",m:"裂缝，破裂",p:"n/v",e:"There is a crack in the wall."},
+{w:"craft",m:"工艺，手艺",p:"n",e:"He learned the craft of woodworking."},
+{w:"crash",m:"碰撞，崩溃",p:"n/v",e:"The car crashed into a tree."},
+{w:"crawl",m:"爬行，缓慢行进",p:"v",e:"The baby is learning to crawl."},
+{w:"create",m:"创造，创建",p:"v",e:"The artist created a beautiful painting."},
+{w:"creature",m:"生物，动物",p:"n",e:"Dolphins are intelligent creatures."},
+{w:"credit",m:"信用，学分",p:"n",e:"I don't have enough credit to buy this."},
+{w:"crew",m:"船员，工作人员",p:"n",e:"The flight crew welcomed us on board."},
+{w:"crime",m:"犯罪，罪行",p:"n",e:"The crime rate has decreased."},
+{w:"crisis",m:"危机，关键时刻",p:"n",e:"The country is facing an economic crisis."},
+{w:"critic",m:"评论家，批评家",p:"n",e:"The film received good reviews from critics."},
+{w:"critical",m:"批评的，关键的",p:"adj",e:"This is a critical moment for the company."},
+{w:"criticize",m:"批评，评论",p:"v",e:"Don't criticize him in public."},
+{w:"crucial",m:"关键的，重要的",p:"adj",e:"Timing is crucial in this business."},
+{w:"crush",m:"压碎，迷恋",p:"v/n",e:"The machine crushes rocks into powder."},
+{w:"cue",m:"提示，暗示",p:"n",e:"That's my cue to leave."},
+{w:"cultivate",m:"培养，耕作",p:"v",e:"We need to cultivate good habits."},
+{w:"culture",m:"文化，培养",p:"n",e:"We should respect different cultures."},
+{w:"curious",m:"好奇的，奇怪的",p:"adj",e:"I'm curious about your past."},
+{w:"currency",m:"货币，流通",p:"n",e:"What is the local currency here?"},
+{w:"current",m:"当前的，水流",p:"adj/n",e:"What is your current address?"},
+{w:"curriculum",m:"课程，全部课程",p:"n",e:"The school has a new curriculum."},
+{w:"curse",m:"诅咒，咒骂",p:"n/v",e:"He cursed under his breath."},
+{w:"curve",m:"曲线，弯曲",p:"n/v",e:"The road curves to the left."},
+{w:"custom",m:"习惯，海关",p:"n",e:"It is the custom to give gifts."},
+{w:"customer",m:"顾客，客户",p:"n",e:"The customer is always right."},
+{w:"cycle",m:"循环，自行车",p:"n/v",e:"We should break the cycle of poverty."},
+{w:"damage",m:"损害，损坏",p:"n/v",e:"The storm caused serious damage."},
+{w:"debate",m:"辩论，讨论",p:"n/v",e:"We had a heated debate on this issue."},
+{w:"decade",m:"十年",p:"n",e:"Prices have risen sharply in the last decade."},
+{w:"decline",m:"下降，拒绝",p:"n/v",e:"The population is in decline."},
+{w:"decorate",m:"装饰，装修",p:"v",e:"We decorated the room for the party."},
+{w:"decrease",m:"减少，减小",p:"n/v",e:"There has been a decrease in crime."},
+{w:"defeat",m:"击败，失败",p:"v/n",e:"Our team suffered a defeat."},
+{w:"defend",m:"防御，辩护",p:"v",e:"The lawyer defended his client."},
+{w:"define",m:"定义，界定",p:"v",e:"How do you define success?"},
+{w:"definite",m:"明确的，肯定的",p:"adj",e:"We need a definite answer by tomorrow."},
+{w:"delay",m:"延迟，耽搁",p:"n/v",e:"The flight was delayed by two hours."},
+{w:"delegate",m:"代表，委托",p:"n/v",e:"She was elected as a delegate."},
+{w:"deliberate",m:"故意的，深思熟虑的",p:"adj",e:"The attack was deliberate."},
+{w:"delicate",m:"精致的，脆弱的",p:"adj",e:"Be careful with that delicate vase."},
+{w:"deliver",m:"递送，发表",p:"v",e:"The package was delivered this morning."},
+{w:"demand",m:"要求，需求",p:"n/v",e:"The workers are demanding higher pay."},
+{w:"democracy",m:"民主，民主国家",p:"n",e:"The country is moving towards democracy."},
+{w:"demonstrate",m:"证明，示威",p:"v",e:"The teacher demonstrated the experiment."},
+{w:"deny",m:"否认，拒绝",p:"v",e:"He denied any involvement in the crime."},
+{w:"depart",m:"离开，出发",p:"v",e:"The train departs at 6 p.m."},
+{w:"dependent",m:"依赖的，从属的",p:"adj",e:"The country is heavily dependent on oil."},
+{w:"deposit",m:"存款，押金",p:"n/v",e:"I need to make a deposit at the bank."},
+{w:"depress",m:"使沮丧，压低",p:"v",e:"The news depressed everyone."},
+{w:"derive",m:"获得，源于",p:"v",e:"The word derives from Latin."},
+{w:"describe",m:"描述，形容",p:"v",e:"Can you describe what happened?"},
+{w:"deserve",m:"应得，值得",p:"v",e:"He deserves a reward for his efforts."},
+{w:"design",m:"设计，图案",p:"n/v",e:"The building has a modern design."},
+{w:"desire",m:"渴望，欲望",p:"n/v",e:"He has a strong desire to win."},
+{w:"despair",m:"绝望，失望",p:"n/v",e:"She was in despair after losing her job."},
+{w:"desperate",m:"绝望的，不顾一切的",p:"adj",e:"The team made a desperate attempt to score."},
+{w:"despite",m:"尽管，不管",p:"prep",e:"Despite the rain, we went out."},
+{w:"destination",m:"目的地，终点",p:"n",e:"Our final destination is Rome."},
+{w:"destroy",m:"破坏，毁灭",p:"v",e:"The fire destroyed the building."},
+{w:"detect",m:"察觉，探测",p:"v",e:"The machine can detect small amounts of gas."},
+{w:"determine",m:"决定，确定",p:"v",e:"We need to determine the cause of the problem."},
+{w:"develop",m:"发展，开发",p:"v",e:"The city has developed rapidly."},
+{w:"device",m:"装置，设备",p:"n",e:"This is a safety device."},
+{w:"devote",m:"致力于，奉献",p:"v",e:"She devotes her time to helping others."},
+{w:"diagram",m:"图表，示意图",p:"n",e:"Please look at the diagram on page 10."},
+{w:"dialect",m:"方言，土语",p:"n",e:"He speaks in a southern dialect."},
+{w:"dictate",m:"口述，命令",p:"v",e:"The manager dictated a letter to his secretary."},
+{w:"differ",m:"不同，相异",p:"v",e:"The two brothers differ in personality."},
+{w:"difficult",m:"困难的，难懂的",p:"adj",e:"This is a difficult problem to solve."},
+{w:"digest",m:"消化，领会",p:"v/n",e:"It takes time to digest new information."},
+{w:"digital",m:"数字的",p:"adj",e:"We live in a digital age."},
+{w:"dignity",m:"尊严，高贵",p:"n",e:"He maintained his dignity throughout the trial."},
+{w:"dilemma",m:"困境，进退两难",p:"n",e:"I'm in a dilemma about which job to take."},
+{w:"dimension",m:"尺寸，维度",p:"n",e:"We need to consider every dimension of the problem."},
+{w:"diminish",m:"减少，贬低",p:"v",e:"The storm's power diminished over time."},
+{w:"dine",m:"进餐，宴请",p:"v",e:"We dined at a fancy restaurant."},
+{w:"diploma",m:"文凭，毕业证书",p:"n",e:"She received her diploma last month."},
+{w:"diplomatic",m:"外交的，圆通的",p:"adj",e:"He gave a diplomatic answer."},
+{w:"direct",m:"直接的，指导",p:"adj/v",e:"Can you direct me to the station?"},
+{w:"disable",m:"使失去能力，禁用",p:"v",e:"The accident disabled him for life."},
+{w:"disadvantage",m:"劣势，不利条件",p:"n",e:"The main disadvantage is the cost."},
+{w:"disagree",m:"不同意，不一致",p:"v",e:"I disagree with your opinion."},
+{w:"disappear",m:"消失，不见",p:"v",e:"The magician made the rabbit disappear."},
+{w:"disappoint",m:"使失望",p:"v",e:"Don't disappoint your parents."},
+{w:"disaster",m:"灾难，祸患",p:"n",e:"The earthquake was a terrible disaster."},
+{w:"discard",m:"丢弃，抛弃",p:"v",e:"Please discard the old batteries."},
+{w:"discipline",m:"纪律，学科",p:"n",e:"The school has strict discipline."},
+{w:"discount",m:"折扣",p:"n",e:"I got a 20% discount on these shoes."},
+{w:"discourage",m:"使气馁，阻止",p:"v",e:"Don't let one failure discourage you."},
+{w:"discover",m:"发现，发觉",p:"v",e:"Columbus discovered America in 1492."},
+{w:"discriminate",m:"歧视，区别",p:"v",e:"It is illegal to discriminate against others."},
+{w:"discuss",m:"讨论，论述",p:"v",e:"We need to discuss this matter further."},
+{w:"disease",m:"疾病",p:"n",e:"Heart disease runs in his family."},
+{w:"disguise",m:"伪装，掩饰",p:"n/v",e:"She went to the party in disguise."},
+{w:"disgust",m:"厌恶，反感",p:"n/v",e:"The smell filled her with disgust."},
+{w:"dismiss",m:"解雇，解散",p:"v",e:"He was dismissed for being late too often."},
+{w:"disorder",m:"混乱，失调",p:"n",e:"The room was in complete disorder."},
+{w:"display",m:"展示，显示",p:"n/v",e:"The museum displays ancient artifacts."},
+{w:"dispose",m:"处理，安排",p:"v",e:"Please dispose of your trash properly."},
+{w:"dispute",m:"争论，纠纷",p:"n/v",e:"The two countries are in dispute over territory."},
+{w:"dissolve",m:"溶解，解散",p:"v",e:"Sugar dissolves in water."},
+{w:"distance",m:"距离，远方",p:"n",e:"The distance between the cities is 100 miles."},
+{w:"distinct",m:"明显的，独特的",p:"adj",e:"There is a distinct smell of coffee."},
+{w:"distinguish",m:"区分，辨别",p:"v",e:"Can you distinguish between the two?"},
+{w:"distribute",m:"分配，分发",p:"v",e:"The teacher distributed the exam papers."},
+{w:"district",m:"区域，地区",p:"n",e:"This is a residential district."},
+{w:"disturb",m:"打扰，扰乱",p:"v",e:"I'm sorry to disturb you, but..."},
+{w:"diverse",m:"多样的，不同的",p:"adj",e:"We have a diverse workforce."},
+{w:"divide",m:"划分，分开",p:"v",e:"Let's divide the work equally."},
+{w:"divorce",m:"离婚，分离",p:"n/v",e:"Their marriage ended in divorce."},
+{w:"document",m:"文件，文献",p:"n/v",e:"Please read this document carefully."},
+{w:"domestic",m:"国内的，家庭的",p:"adj",e:"Domestic flights are cheaper."},
+{w:"dominate",m:"支配，控制",p:"v",e:"The team dominated the game."},
+{w:"donate",m:"捐赠，捐献",p:"v",e:"They donated money to the charity."},
+{w:"dose",m:"剂量，一剂",p:"n",e:"Take one dose every four hours."},
+{w:"draft",m:"草稿，草案",p:"n/v",e:"I need to finish the first draft by Friday."},
+{w:"drag",m:"拖，拉",p:"v",e:"He dragged the heavy box across the floor."},
+{w:"dramatic",m:"戏剧性的，引人注目的",p:"adj",e:"There has been a dramatic increase in sales."},
+{w:"drawer",m:"抽屉",p:"n",e:"I keep my socks in the top drawer."},
+{w:"drift",m:"漂流，漂移",p:"v/n",e:"The boat drifted out to sea."},
+{w:"drought",m:"干旱，缺乏",p:"n",e:"The region is suffering from a severe drought."},
+{w:"drown",m:"淹死，淹没",p:"v",e:"He almost drowned in the river."},
+{w:"drug",m:"药物，毒品",p:"n",e:"The doctor prescribed a new drug."},
+{w:"due",m:"到期的，由于",p:"adj",e:"The rent is due on the first of the month."},
+{w:"dull",m:"枯燥的，迟钝的",p:"adj",e:"The lecture was very dull."},
+{w:"dump",m:"倾倒，垃圾场",p:"v/n",e:"Don't dump your rubbish here."},
+{w:"duration",m:"持续，期间",p:"n",e:"The duration of the course is one year."},
+{w:"duty",m:"责任，关税",p:"n",e:"It is my duty to help you."},
+{w:"dynamic",m:"动态的，有活力的",p:"adj",e:"She is a dynamic young leader."}
+];
+
+const phraseDB = [
+{p:"take up",m:"开始从事；占据",e:"I took up painting last year."},
+{p:"put off",m:"推迟，拖延",e:"Don't put off your homework."},
+{p:"turn out",m:"结果是，关掉",e:"It turned out to be true."},
+{p:"give up",m:"放弃",e:"Never give up on your dreams."},
+{p:"set up",m:"建立，设立",e:"They set up a new company."},
+{p:"pick up",m:"捡起，学会，接人",e:"I picked up some French in Paris."},
+{p:"carry out",m:"执行，实施",e:"We need to carry out the plan."},
+{p:"figure out",m:"弄清楚，解决",e:"I can't figure out this problem."},
+{p:"point out",m:"指出",e:"She pointed out my mistake."},
+{p:"bring up",m:"抚养，提出",e:"She brought up an interesting point."},
+{p:"call off",m:"取消",e:"They called off the meeting."},
+{p:"catch up",m:"赶上，追上",e:"I need to catch up on sleep."},
+{p:"check in",m:"登记入住",e:"We checked in at the hotel."},
+{p:"check out",m:"退房，查看",e:"Let's check out this new restaurant."},
+{p:"come across",m:"偶然遇到",e:"I came across an old photo."},
+{p:"come up with",m:"提出，想出",e:"She came up with a great idea."},
+{p:"cut down",m:"削减，砍倒",e:"We need to cut down on expenses."},
+{p:"deal with",m:"处理，涉及",e:"I'll deal with this problem tomorrow."},
+{p:"do without",m:"没有...也行",e:"I can't do without my phone."},
+{p:"drop out",m:"退出，退学",e:"He dropped out of college."},
+{p:"fall behind",m:"落后",e:"Don't fall behind with payments."},
+{p:"get along",m:"相处，进展",e:"Do you get along with him?"},
+{p:"get away",m:"逃脱，离开",e:"The thief got away with the money."},
+{p:"get by",m:"勉强过活",e:"I get by on my salary."},
+{p:"get in",m:"进入，收获",e:"Get in the car, please."},
+{p:"get off",m:"下车，离开",e:"I get off work at 6 p.m."},
+{p:"get on",m:"上车，进展",e:"Get on the bus at the next stop."},
+{p:"get out",m:"出去，泄露",e:"Get out of here!"},
+{p:"get over",m:"克服，恢复",e:"She got over her illness quickly."},
+{p:"get rid of",m:"摆脱，除去",e:"We need to get rid of those old clothes."},
+{p:"get up",m:"起床，站起来",e:"I get up at 7 every morning."},
+{p:"give away",m:"赠送，泄露",e:"Don't give away the ending."},
+{p:"give back",m:"归还",e:"Please give back my book."},
+{p:"give in",m:"屈服，让步",e:"She finally gave in to pressure."},
+{p:"go ahead",m:"前进，开始",e:"Go ahead, I'm listening."},
+{p:"go over",m:"复习，检查",e:"Let's go over the plan again."},
+{p:"grow up",m:"长大，成熟",e:"I grew up in a small town."},
+{p:"hand in",m:"上交",e:"Please hand in your homework."},
+{p:"hand out",m:"分发",e:"The teacher handed out the papers."},
+{p:"hang on",m:"稍等，坚持",e:"Hang on a minute, please."},
+{p:"hang up",m:"挂断电话",e:"She hung up on me."},
+{p:"hold on",m:"坚持，稍等",e:"Hold on, I'm coming."},
+{p:"keep on",m:"继续",e:"Keep on trying, you'll succeed."},
+{p:"lay off",m:"解雇，休息",e:"The company laid off 100 workers."},
+{p:"leave out",m:"遗漏，省略",e:"Don't leave me out of the game."},
+{p:"let down",m:"使失望",e:"Don't let me down."},
+{p:"look after",m:"照顾",e:"I'll look after your cat."},
+{p:"look for",m:"寻找",e:"I'm looking for my keys."},
+{p:"look forward to",m:"期待",e:"I look forward to meeting you."},
+{p:"look into",m:"调查，观察",e:"The police are looking into the case."}
+];
+
+const listeningDB = [
+{
+  type:"news",
+  title:"News Report 1: University Research",
+  text:"Scientists at a leading university have announced a breakthrough in battery technology. The new batteries can charge in just five minutes and last three times longer than current models. The research team spent five years developing this technology. They say it could be available for electric cars within two years. However, some experts warn that mass production may face challenges. The university is now looking for industrial partners to bring the technology to market.",
+  questions:[
+    {q:"What is the main topic of this news report?",options:["A new university building","A breakthrough in battery technology","A new electric car model","A research funding cut"],answer:1,exp:"原文第一句明确提到'breakthrough in battery technology'。"},
+    {q:"How long did the research team spend developing this technology?",options:["Two years","Three years","Five years","Ten years"],answer:2,exp:"原文提到'The research team spent five years developing this technology.'"},
+    {q:"What is the university looking for now?",options:["More researchers","Government funding","Industrial partners","Student volunteers"],answer:2,exp:"原文最后一句'The university is now looking for industrial partners...'"}
+  ]
+},
+{
+  type:"news",
+  title:"News Report 2: Local Festival",
+  text:"The annual Spring Flower Festival will open next Saturday in the city center park. Organizers expect over 50,000 visitors this year. The festival will feature more than 200 types of flowers from around the world. There will also be live music, food stalls, and gardening workshops. Entry is free for children under 12 and seniors over 65. All other visitors need to buy a ticket for 20 yuan. The event will run from 9 a.m. to 6 p.m. each day for one week.",
+  questions:[
+    {q:"Where will the Spring Flower Festival be held?",options:["In a shopping mall","In the city center park","At a university","In a botanical garden"],answer:1,exp:"原文'in the city center park'。"},
+    {q:"How much is the ticket price?",options:["10 yuan","15 yuan","20 yuan","Free for everyone"],answer:2,exp:"原文'All other visitors need to buy a ticket for 20 yuan.'"},
+    {q:"Who can enter the festival for free?",options:["Students and teachers","Children under 12 and seniors over 65","Local residents","Gardening club members"],answer:1,exp:"原文'Entry is free for children under 12 and seniors over 65.'"}
+  ]
+},
+{
+  type:"dialog",
+  title:"Long Conversation: Job Interview",
+  text:"W: Good morning. Please have a seat. I'm Sarah, the HR manager.\nM: Good morning, Sarah. Thank you for having me.\nW: So, I see you graduated last year. What have you been doing since then?\nM: I worked as an intern at a marketing company for six months. Then I spent three months traveling and learning photography.\nW: Interesting. Why do you want to work for our company?\nM: I've always admired your products. I believe my marketing experience and creative skills would be a good fit here.\nW: That's great. We do value creativity. Do you have any questions for me?\nM: Yes. What does a typical day look like for this position?\nW: Well, you'll work closely with the design team. Most days involve meetings, content planning, and social media management. Sometimes you'll need to visit our stores for promotional events.",
+  questions:[
+    {q:"What did the man do after graduation?",options:["He started his own company","He worked as an intern and then traveled","He went to graduate school","He worked as a photographer"],answer:1,exp:"原文提到'worked as an intern...for six months. Then...traveling and learning photography.'"},
+    {q:"Why does the man want to work for this company?",options:["Because of the high salary","Because he admires their products","Because his friend works there","Because it is close to his home"],answer:1,exp:"原文'I've always admired your products.'"},
+    {q:"What will the man do if he gets the job?",options:["Work with the design team","Manage the HR department","Visit factories every day","Teach photography classes"],answer:0,exp:"原文'you'll work closely with the design team'。"},
+    {q:"What is NOT mentioned as part of the daily work?",options:["Meetings","Content planning","Store visits","Product design"],answer:3,exp:"原文提到了meetings, content planning, social media management, visit stores，但没有说product design。"}
+  ]
+},
+{
+  type:"dialog",
+  title:"Long Conversation: Study Abroad",
+  text:"M: Hi Lucy, I heard you're planning to study abroad next year.\nW: Yes, I'm thinking about going to the UK or Australia.\nM: That's exciting. Have you decided on a major?\nW: I want to study environmental science. The programs in Australia seem really strong in that field.\nM: What about the cost? Isn't studying abroad expensive?\nW: It is, but I'm applying for scholarships. My parents said they'll support me if I get at least a partial scholarship.\nM: That's nice of them. When do you need to apply?\nW: The deadline for most programs is in December. So I need to prepare my documents and language test scores soon.\nM: Good luck! I'm sure you'll get in.",
+  questions:[
+    {q:"Where is Lucy considering studying?",options:["The US and Canada","The UK and Australia","Germany and France","Japan and Korea"],answer:1,exp:"原文'I'm thinking about going to the UK or Australia.'"},
+    {q:"What does Lucy want to study?",options:["Business","Computer science","Environmental science","Medicine"],answer:2,exp:"原文'I want to study environmental science.'"},
+    {q:"What is Lucy's parents' condition for supporting her?",options:["She must study business","She must get a scholarship","She must work part-time","She must return after graduation"],answer:1,exp:"原文'My parents said they'll support me if I get at least a partial scholarship.'"},
+    {q:"When is the application deadline?",options:["September","October","November","December"],answer:3,exp:"原文'The deadline for most programs is in December.'"}
+  ]
+},
+{
+  type:"passage",
+  title:"Passage 1: The Power of Reading",
+  text:"Reading is one of the most important skills a person can develop. Studies show that people who read regularly are more likely to succeed in their careers. Reading improves vocabulary, critical thinking, and empathy.\n\nIn the digital age, many people worry that young people are reading less. However, recent research suggests that young people are simply reading in different formats. E-books, online articles, and social media posts all count as reading. The key is not the format but the quality of content.\n\nExperts recommend reading for at least 30 minutes every day. This habit can reduce stress, improve sleep quality, and even delay memory loss in old age. Libraries and book clubs are great places to start for those who want to read more.",
+  questions:[
+    {q:"What is the main idea of this passage?",options:["Reading is becoming less popular","Digital books are better than paper books","Reading is beneficial in many ways","Young people don't read anymore"],answer:2,exp:"全文围绕阅读的好处展开。"},
+    {q:"According to the passage, what do studies show about regular readers?",options:["They are healthier","They earn more money","They are more likely to succeed in careers","They live longer"],answer:2,exp:"原文'people who read regularly are more likely to succeed in their careers.'"},
+    {q:"What does recent research suggest about young people's reading?",options:["They read less than before","They read in different formats","They only read social media","They prefer paper books"],answer:1,exp:"原文'young people are simply reading in different formats.'"},
+    {q:"How long do experts recommend reading every day?",options:["15 minutes","30 minutes","45 minutes","One hour"],answer:1,exp:"原文'Experts recommend reading for at least 30 minutes every day.'"}
+  ]
+},
+{
+  type:"passage",
+  title:"Passage 2: Urban Farming",
+  text:"Urban farming is becoming popular in cities around the world. As more people move to cities, the demand for fresh, local food increases. Urban farms can be on rooftops, balconies, or even inside buildings using special lights.\n\nThe benefits of urban farming are numerous. First, it reduces the distance food travels from farm to table. This means fresher produce and lower carbon emissions. Second, it creates green spaces in concrete-heavy cities. These spaces improve air quality and provide relaxation for residents.\n\nHowever, urban farming also faces challenges. Space is limited and expensive in cities. Water and electricity costs can be high for indoor farms. Despite these challenges, many cities are supporting urban farming through tax breaks and education programs.",
+  questions:[
+    {q:"Why is urban farming becoming popular?",options:["It is cheaper than rural farming","More people are moving to cities","Governments require it","It uses less water"],answer:1,exp:"原文'As more people move to cities, the demand for fresh, local food increases.'"},
+    {q:"What is mentioned as a benefit of urban farming?",options:["It creates more jobs","It reduces food transportation distance","It increases property prices","It replaces all rural farms"],answer:1,exp:"原文'it reduces the distance food travels from farm to table.'"},
+    {q:"What challenge does urban farming face?",options:["Lack of interest from residents","Limited and expensive space","Too much government control","Poor quality of produce"],answer:1,exp:"原文'Space is limited and expensive in cities.'"},
+    {q:"How are some cities supporting urban farming?",options:["By banning rural food","Through tax breaks and education programs","By giving free land","By building more supermarkets"],answer:1,exp:"原文'many cities are supporting urban farming through tax breaks and education programs.'"}
+  ]
+}
+];
+
+const grammarDB = [
+{q:"If I ___ you, I would accept the offer.",options:["am","was","were","be"],a:2,exp:"虚拟语气中，与现在事实相反，if从句用过去式，be动词一律用were。"},
+{q:"The book ___ on the table belongs to my sister.",options:["laying","lying","laid","lain"],a:1,exp:"lie(位于)-lay-lain-lying；lay(放置)-laid-laid-laying。这里表示'位于'，用lying。"},
+{q:"Not only ___ hard, but he also plays hard.",options:["he works","does he work","he does work","works he"],a:1,exp:"Not only置于句首时，句子要部分倒装，即助动词提前。"},
+{q:"By the time we arrived, the movie ___.",options:["has started","had started","started","was starting"],a:1,exp:"By the time + 过去时，主句用过去完成时，表示'过去的过去'。"},
+{q:"The reason ___ he was late is unclear.",options:["why","which","that","what"],a:0,exp:"reason作先行词时，定语从句关系副词用why。"},
+{q:"I suggest that he ___ there at once.",options:["goes","went","go","going"],a:2,exp:"suggest表示'建议'时，宾语从句用虚拟语气(should)+动词原形，should可省略。"},
+{q:"___ the rain, we went out for a walk.",options:["Because of","Because","As","Since"],a:0,exp:"后面接名词the rain，要用Because of。Because/As/Since后接从句。"},
+{q:"This is one of the best books ___ ever written.",options:["that has","that have","which has","which have"],a:1,exp:"先行词有one of the最高级修饰时，定语从句用that引导；谓语与books保持一致用have。"},
+{q:"Hardly ___ the door when the phone rang.",options:["I had closed","had I closed","I closed","did I close"],a:1,exp:"Hardly...when结构中，hardly置于句首时主句部分倒装，且用过去完成时。"},
+{q:"The meeting ___ next Monday is very important.",options:["to hold","to be held","held","holding"],a:1,exp:"不定式作后置定语，meeting与hold是被动关系，且动作尚未发生，用to be held。"},
+{q:"It is no use ___ over spilt milk.",options:["cry","to cry","crying","cried"],a:2,exp:"It is no use doing sth. 是固定句型，表示'做某事没用'。"},
+{q:"The news ___ exciting.",options:["are","is","were","be"],a:1,exp:"news是不可数名词，谓语动词用单数is。"},
+{q:"I would rather you ___ here yesterday.",options:["come","came","had come","have come"],a:2,exp:"would rather后接从句，与过去事实相反用过去完成时had come。"},
+{q:"___ in thought, he didn't notice me enter.",options:["Losing","Lost","Having lost","To lose"],a:1,exp:"be lost in thought是固定搭配，此处用过去分词短语作状语。"},
+{q:"The professor, together with his students, ___ attending the conference.",options:["are","is","were","be"],a:1,exp:"主语后接together with时，谓语与前面的主语The professor保持一致，用单数。"},
+{q:"If it ___ tomorrow, we would cancel the picnic.",options:["rains","will rain","rained","should rain"],a:2,exp:"与将来事实相反的虚拟语气，if从句可用过去式/should+do/were to do。"},
+{q:"The project ___ by the end of next month.",options:["will complete","will be completed","will have completed","will have been completed"],a:3,exp:"by the end of next month是将来完成时的标志，且project与complete是被动关系。"},
+{q:"___ you study harder, you will pass the exam.",options:["As long as","As soon as","As far as","As well as"],a:0,exp:"As long as表示'只要'，引导条件状语从句。"},
+{q:"I have two brothers, ___ of whom is a doctor.",options:["the older","the oldest","older","oldest"],a:0,exp:"两者比较用比较级older，特指'年长的那个'加the。"},
+{q:"The factory ___ his father works is far from here.",options:["that","where","which","in that"],a:1,exp:"works是不及物动词，定语从句缺地点状语，用where引导。"}
+];
+
+const translationDB = [
+{cn:"中国是一个历史悠久的国家，拥有丰富的文化遗产。近年来，中国政府大力保护传统文化，同时推动文化创新。越来越多的年轻人开始学习和传承传统艺术，如书法、京剧和剪纸。这些努力不仅有助于保存民族记忆，也为世界文化多样性做出了贡献。",
+ en:"China is a country with a long history and rich cultural heritage. In recent years, the Chinese government has made great efforts to protect traditional culture while promoting cultural innovation. More and more young people have begun to learn and inherit traditional arts such as calligraphy, Peking Opera, and paper-cutting. These efforts not only help preserve national memory but also contribute to world cultural diversity.",
+ keywords:["long history","cultural heritage","traditional culture","cultural innovation","calligraphy","Peking Opera","paper-cutting","national memory","cultural diversity"]},
+{cn:"随着科技的发展，人工智能正在改变我们的生活方式。从智能手机到自动驾驶汽车，AI技术已经渗透到日常生活的方方面面。然而，人们在享受便利的同时，也开始担心隐私泄露和就业问题。因此，如何在技术进步与社会稳定之间找到平衡，成为当前面临的重要挑战。",
+ en:"With the development of technology, artificial intelligence is changing our way of life. From smartphones to self-driving cars, AI technology has penetrated every aspect of daily life. However, while enjoying convenience, people have also begun to worry about privacy leaks and employment issues. Therefore, how to find a balance between technological progress and social stability has become an important challenge facing us.",
+ keywords:["artificial intelligence","way of life","smartphones","self-driving cars","daily life","privacy leaks","employment issues","technological progress","social stability","balance"]},
+{cn:"春节是中国最重要的传统节日，通常在农历正月初一庆祝。春节期间，人们会回家与家人团聚，一起吃年夜饭、看春晚、放鞭炮。红色是春节的主色调，象征着好运和幸福。如今，虽然一些传统习俗有所简化，但春节依然是中国人心中最温暖的节日。",
+ en:"The Spring Festival is the most important traditional festival in China, usually celebrated on the first day of the first lunar month. During the Spring Festival, people return home to reunite with their families, eat reunion dinner, watch the Spring Festival Gala, and set off firecrackers together. Red is the main color of the Spring Festival, symbolizing good luck and happiness. Today, although some traditional customs have been simplified, the Spring Festival remains the warmest festival in the hearts of Chinese people.",
+ keywords:["Spring Festival","traditional festival","lunar month","reunite","reunion dinner","Spring Festival Gala","firecrackers","good luck","happiness","traditional customs"]},
+{cn:"环境保护是当今世界面临的重大课题。随着工业化进程的加快，空气污染、水污染和土壤污染问题日益严重。中国政府已经采取了一系列措施，包括推广新能源汽车、建设污水处理设施和加强环境立法。每个人都应该从自身做起，减少使用一次性塑料制品，为保护地球家园贡献力量。",
+ en:"Environmental protection is a major issue facing the world today. With the acceleration of industrialization, air pollution, water pollution, and soil pollution have become increasingly serious. The Chinese government has taken a series of measures, including promoting new energy vehicles, building sewage treatment facilities, and strengthening environmental legislation. Everyone should start from themselves, reduce the use of disposable plastic products, and contribute to protecting our home planet.",
+ keywords:["environmental protection","industrialization","air pollution","water pollution","soil pollution","new energy vehicles","sewage treatment","environmental legislation","disposable plastic products","protect"]},
+{cn:"在线教育在近年来得到了快速发展，尤其是在新冠疫情期间，网课成为了学生学习的主要方式。在线教育打破了时间和空间的限制，让优质教育资源能够惠及更多地区。但是，长时间面对屏幕也引发了人们对学生视力健康和注意力分散的担忧。因此，线上线下相结合的教学模式可能是未来的发展方向。",
+ en:"Online education has developed rapidly in recent years. Especially during the COVID-19 pandemic, online classes became the main way for students to learn. Online education breaks the limitations of time and space, allowing quality educational resources to benefit more regions. However, facing screens for long periods has also raised concerns about students' vision health and distraction. Therefore, a teaching model combining online and offline methods may be the future direction of development.",
+ keywords:["online education","COVID-19 pandemic","online classes","break limitations","quality educational resources","vision health","distraction","combining online and offline","future direction"]},
+{cn:"中国的高铁网络是世界上最大的高速铁路系统。自2008年第一条高铁线路开通以来，中国高铁发展迅速，总里程已超过4万公里。高铁不仅大大缩短了城市之间的旅行时间，还促进了沿线地区的经济发展。乘坐高铁出行已成为中国人首选的交通方式之一，以其安全、快速和舒适而闻名。",
+ en:"China's high-speed rail network is the world's largest high-speed railway system. Since the opening of the first high-speed rail line in 2008, China's high-speed rail has developed rapidly, with a total mileage exceeding 40,000 kilometers. High-speed rail not only greatly shortens travel time between cities but also promotes economic development along the routes. Traveling by high-speed rail has become one of the preferred modes of transportation for Chinese people, known for its safety, speed, and comfort.",
+ keywords:["high-speed rail network","high-speed railway system","total mileage","shorten travel time","economic development","preferred modes of transportation","safety","speed","comfort"]},
+{cn:"健康饮食对每个人来说都很重要。中国有句老话：'民以食为天。'随着生活水平的提高，人们越来越关注食品的质量和营养搭配。多吃蔬菜水果、减少油腻食物的摄入，是保持身体健康的基本原则。此外，规律的饮食习惯和适量的运动也是不可或缺的。",
+ en:"Healthy diet is very important for everyone. As the old Chinese saying goes, 'Food is the first necessity of the people.' With the improvement of living standards, people are paying more and more attention to food quality and nutritional balance. Eating more vegetables and fruits and reducing the intake of greasy food are basic principles for maintaining good health. In addition, regular eating habits and moderate exercise are also indispensable.",
+ keywords:["healthy diet","living standards","food quality","nutritional balance","vegetables and fruits","greasy food","maintain good health","regular eating habits","moderate exercise","indispensable"]},
+{cn:"乡村振兴是中国当前的重要发展战略。政府通过改善农村基础设施、发展特色农业和推广乡村旅游，努力提高农民的生活水平。许多年轻人选择回到家乡创业，利用互联网销售农产品。这些变化不仅为农村带来了新的活力，也为城市消费者提供了更多绿色、有机的食品选择。",
+ en:"Rural revitalization is an important development strategy in China at present. The government is working hard to improve farmers' living standards by improving rural infrastructure, developing characteristic agriculture, and promoting rural tourism. Many young people choose to return to their hometowns to start businesses, using the Internet to sell agricultural products. These changes not only bring new vitality to rural areas but also provide urban consumers with more green and organic food choices.",
+ keywords:["rural revitalization","development strategy","rural infrastructure","characteristic agriculture","rural tourism","living standards","start businesses","agricultural products","new vitality","organic food"]},
+{cn:"移动支付在中国已经非常普及。无论是大型商场还是街边小摊，都可以使用手机扫码付款。支付宝和微信支付是最常用的两种方式。这种支付方式不仅方便快捷，还减少了现金交易带来的安全隐患。如今，越来越多的老年人也开始学习使用移动支付，享受数字化生活的便利。",
+ en:"Mobile payment has become very popular in China. Whether in large shopping malls or street stalls, people can use their mobile phones to scan QR codes for payment. Alipay and WeChat Pay are the two most commonly used methods. This payment method is not only convenient and fast but also reduces the security risks associated with cash transactions. Nowadays, more and more elderly people are also learning to use mobile payments, enjoying the convenience of digital life.",
+ keywords:["mobile payment","shopping malls","street stalls","scan QR codes","Alipay","WeChat Pay","convenient and fast","security risks","cash transactions","digital life"]},
+{cn:"中医药是中国传统文化的瑰宝，有着数千年的历史。与西医不同，中医强调整体观念和辨证施治，常用草药、针灸和推拿等方法治疗疾病。近年来，中医药在国际上的影响力不断扩大，越来越多的国家开始认可并接受中医药治疗。中国政府也在积极推动中医药的现代化和国际化发展。",
+ en:"Traditional Chinese medicine is a treasure of Chinese traditional culture with a history of thousands of years. Unlike Western medicine, traditional Chinese medicine emphasizes holistic concepts and syndrome differentiation treatment, commonly using herbs, acupuncture, and massage to treat diseases. In recent years, the international influence of traditional Chinese medicine has been expanding, and more and more countries have begun to recognize and accept traditional Chinese medicine treatment. The Chinese government is also actively promoting the modernization and international development of traditional Chinese medicine.",
+ keywords:["traditional Chinese medicine","treasure","thousands of years","Western medicine","holistic concepts","syndrome differentiation","herbs","acupuncture","massage","modernization","international development"]}
+];
+
+const writingDB = [
+{title:"Online Learning: Boon or Bane?",
+ outline:"1. 在线学习的普及情况\n2. 在线学习的优势（灵活、资源丰富）\n3. 在线学习的劣势（缺乏互动、自律要求高）\n4. 你的观点和建议",
+ sample:"In recent years, online learning has become increasingly popular, especially among college students. While some people praise its convenience, others worry about its negative effects. From my perspective, online learning is a double-edged sword that requires careful use.\n\nOn the one hand, online learning offers great flexibility. Students can access high-quality courses from top universities without leaving their homes. This is particularly beneficial for those who live in remote areas or have busy schedules. Moreover, the Internet provides abundant learning resources that can satisfy various interests and needs.\n\nOn the other hand, online learning has obvious drawbacks. The lack of face-to-face interaction may reduce students' motivation and engagement. Some students find it difficult to concentrate when studying alone in front of a screen. Without proper self-discipline, online learning can easily become a waste of time.\n\nIn conclusion, online learning is neither purely good nor bad. The key lies in how we use it. I suggest that students combine online and offline learning, set clear goals, and maintain regular study schedules. Only in this way can we truly benefit from the digital age of education."},
+{title:"The Importance of Environmental Protection",
+ outline:"1. 环境问题的现状\n2. 保护环境的重要性（健康、可持续发展）\n3. 个人和政府可以采取的措施\n4. 呼吁行动",
+ sample:"Environmental protection has become one of the most urgent issues in the modern world. With the rapid development of industry, our planet is facing unprecedented challenges including air pollution, water contamination, and climate change. It is high time that we took immediate action to protect our environment.\n\nFirst and foremost, environmental protection is closely related to human health. Clean air and water are essential for our survival. Studies have shown that pollution is responsible for millions of premature deaths every year. By protecting the environment, we are actually protecting ourselves and future generations.\n\nFurthermore, sustainable development is impossible without a healthy ecosystem. Natural resources are limited, and their excessive consumption will eventually lead to ecological collapse. We must find a balance between economic growth and environmental preservation.\n\nAs individuals, we can start with small things: use public transportation, reduce plastic waste, and save energy. Governments should strengthen environmental legislation and invest in green technologies. Remember: there is no Planet B. Let's work together to create a greener and more sustainable future."},
+{title:"The Role of Traditional Culture in Modern Society",
+ outline:"1. 传统文化面临的挑战\n2. 传统文化的价值（身份认同、智慧传承）\n3. 如何在现代生活中传承传统文化\n4. 总结",
+ sample:"In an era of globalization and rapid technological change, traditional culture is facing unprecedented challenges. Many young people are more interested in foreign pop culture than in their own cultural heritage. However, I believe that traditional culture still plays an irreplaceable role in modern society.\n\nTraditional culture is the root of our national identity. It connects us with our ancestors and gives us a sense of belonging. Customs, festivals, and traditional arts carry the wisdom accumulated over thousands of years. Without understanding our traditions, we would lose an important part of who we are.\n\nMoreover, traditional culture offers valuable insights for modern life. Concepts like harmony between humans and nature, respect for elders, and emphasis on education are still relevant today. Many traditional practices, such as tea culture and martial arts, have also gained international popularity.\n\nTo preserve traditional culture, we need innovative approaches. Schools should include more traditional culture in their curricula. Technology can be used to make traditional arts more accessible and appealing to young people. Most importantly, every individual should take pride in their cultural heritage and pass it on to the next generation."},
+{title:"The Impact of Social Media on Interpersonal Relationships",
+ outline:"1. 社交媒体的普及\n2. 对人际关系的积极影响（保持联系、扩大社交圈）\n3. 对人际关系的消极影响（表面化、隐私问题）\n4. 如何健康使用社交媒体",
+ sample:"Social media has fundamentally changed the way people communicate and build relationships. Platforms like WeChat, Weibo, and Douyin have become integral parts of our daily lives. While they offer many conveniences, their impact on interpersonal relationships deserves careful examination.\n\nOn the positive side, social media helps us maintain connections with friends and family across long distances. It allows us to share important moments instantly and stay updated on each other's lives. For shy people, social media provides a comfortable platform to express themselves and make new friends.\n\nHowever, the negative impacts cannot be ignored. Many relationships on social media are superficial, based on likes and comments rather than genuine understanding. Excessive use of social media may reduce face-to-face communication skills. Privacy concerns also arise as personal information is easily shared and potentially misused.\n\nIn my opinion, the key is to use social media wisely. We should prioritize quality over quantity in our online relationships. Setting time limits for social media use and making time for in-person interactions are essential. Remember, technology should serve as a bridge, not a barrier, to human connection."}
+];
+
+const speakPart1 = [
+{topic:"Hometown",questions:["Where is your hometown?","What do you like most about your hometown?","Has your hometown changed much since you were a child?","Would you like to live in your hometown in the future?"],
+ sample:"My hometown is a small city in the south of China. What I like most about it is the slow pace of life and the friendly people. It has changed a lot since I was a child—there are now many high-rise buildings and shopping malls. However, I still prefer living in a bigger city for more career opportunities, so I probably won't move back permanently."},
+{topic:"Study",questions:["What subject are you studying?","Why did you choose this subject?","What do you like most about your studies?","Is there anything you find difficult about your studies?"],
+ sample:"I'm studying computer science at university. I chose this subject because I've always been fascinated by technology and how it can solve real-world problems. What I like most is the practical nature of the coursework—we get to build actual programs. The most difficult part is probably the advanced mathematics, but I'm working hard to improve."},
+{topic:"Food",questions:["What kind of food do you like?","Do you like cooking?","What is your favorite dish?","Have your eating habits changed since you were a child?"],
+ sample:"I love Chinese food, especially Sichuan cuisine because I enjoy spicy flavors. I don't cook very often since I'm busy with studies, but I can make simple dishes like tomato and egg. My favorite dish is hot pot because it's social and customizable. My eating habits have definitely changed—I used to hate vegetables, but now I try to eat healthy."},
+{topic:"Transportation",questions:["How do you usually travel to school/work?","What is your favorite mode of transportation?","Do you prefer public transport or private cars?","Has transportation changed much in your city?"],
+ sample:"I usually take the subway to school because it's fast and reliable. My favorite mode of transportation is actually cycling—I love the feeling of freedom. I prefer public transport during rush hours because traffic jams are terrible. In recent years, my city has built many new subway lines, which has made getting around much easier."},
+{topic:"Hobbies",questions:["What do you like to do in your free time?","Do you prefer indoor or outdoor activities?","Have your hobbies changed since you were a child?","Do you think hobbies are important?"],
+ sample:"In my free time, I enjoy reading novels and playing basketball. I prefer outdoor activities because they help me relax and stay fit. When I was a child, I loved playing video games, but now I prefer more active hobbies. I definitely think hobbies are important—they reduce stress and help us develop new skills."}
+];
+
+const speakPart2 = [
+{cue:"Describe a book that you enjoyed reading.",points:["What the book is","What it is about","Why you read it","And explain why you enjoyed it"],
+ sample:"I'd like to talk about 'To Live' by Yu Hua, which is one of the most moving books I've ever read. It tells the story of a man named Fugui who experiences tremendous hardships during China's turbulent historical periods. I read it during my high school years because it was recommended by my Chinese teacher. I enjoyed it because the writing is simple yet profoundly touching. The book made me realize how resilient human beings can be in the face of suffering. It also helped me understand my grandparents' generation better. Even though it's a sad story, it leaves you with a sense of hope and appreciation for life."},
+{cue:"Describe a place you have visited that had a lot of natural beauty.",points:["Where it is","When you went there","What you did there","And explain why you thought it was beautiful"],
+ sample:"The most beautiful place I've visited is Jiuzhaigou in Sichuan Province. I went there last summer with my family. We spent three days hiking through the valleys and visiting the famous colorful lakes. I thought it was incredibly beautiful because the water in the lakes was so clear that you could see all the way to the bottom, and the colors ranged from turquoise to deep blue. The surrounding mountains were covered with forests, and the air was incredibly fresh. It felt like being in a fairy tale. What impressed me most was the Pearl Shoal Waterfall—it was majestic and powerful. That trip made me appreciate the importance of protecting natural environments."},
+{cue:"Describe a person who has influenced you a lot.",points:["Who this person is","How you know them","What they have done","And explain why they influenced you"],
+ sample:"The person who has influenced me most is my high school English teacher, Mr. Zhang. I met him when I was in grade 10. He was different from other teachers because he always made classes interesting by telling stories and organizing group activities. What influenced me most was his patience and encouragement. When I failed my first English speech competition, he told me that failure is just a stepping stone to success. He spent extra time helping me improve my pronunciation and confidence. Because of him, I developed a passion for English and decided to major in it at university. His teaching philosophy—that education should inspire rather than force—has shaped my own approach to learning."},
+{cue:"Describe an important decision you have made.",points:["What the decision was","When you made it","How you made it","And explain why it was important"],
+ sample:"An important decision I made was choosing to study abroad for my master's degree. I made this decision about two years ago during my junior year of college. I made it after consulting with my professors, parents, and seniors who had studied overseas. I also did a lot of research about different programs and scholarship opportunities. This decision was important because it completely changed my career path and life perspective. Studying abroad allowed me to experience a different education system, meet people from diverse backgrounds, and become more independent. Although it was challenging at first, I believe it was one of the best decisions I've ever made."},
+{cue:"Describe a piece of technology you use often.",points:["What it is","What you use it for","How long you have used it","And explain why it is useful"],
+ sample:"The piece of technology I use most often is my smartphone. I've been using it for about three years since I bought my current model. I use it for almost everything—communication, navigation, online shopping, studying, and entertainment. It's useful because it combines so many functions into one device. For example, I can attend online classes, take notes, and submit assignments all on my phone. The most useful feature for me is the translation app, which helps me understand English articles quickly. However, I try to limit my screen time because excessive use can be harmful. Overall, my smartphone has become an essential tool in my daily life."}
+];
+
+const speakExpressions = [
+{s:"If I were to choose, I would say...",m:"如果让我选，我会说...",scene:"表达偏好"},
+{s:"There is no denying that...",m:"不可否认...",scene:"强调事实"},
+{s:"From my perspective,...",m:"从我的角度来看...",scene:"表达观点"},
+{s:"What strikes me most is...",m:"最让我印象深刻的是...",scene:"描述感受"},
+{s:"I am convinced that...",m:"我坚信...",scene:"强烈认同"},
+{s:"It goes without saying that...",m:"不言而喻...",scene:" obvious facts"},
+{s:"I am inclined to believe that...",m:"我倾向于相信...",scene:"委婉表达"},
+{s:"That reminds me of...",m:"那让我想起了...",scene:"联想过渡"},
+{s:"To put it another way,...",m:"换句话说...",scene:"解释说明"},
+{s:"The way I see it,...",m:"依我看...",scene:"表达观点"}
+];
+
+const cultureDB = [
+{cn:"春节",en:"the Spring Festival / Chinese New Year",cat:"节日"},
+{cn:"元宵节",en:"the Lantern Festival",cat:"节日"},
+{cn:"清明节",en:"Tomb-Sweeping Day / Qingming Festival",cat:"节日"},
+{cn:"端午节",en:"the Dragon Boat Festival",cat:"节日"},
+{cn:"中秋节",en:"the Mid-Autumn Festival",cat:"节日"},
+{cn:"重阳节",en:"the Double Ninth Festival",cat:"节日"},
+{cn:"长城",en:"the Great Wall",cat:"建筑"},
+{cn:"故宫",en:"the Forbidden City / the Palace Museum",cat:"建筑"},
+{cn:"天坛",en:"the Temple of Heaven",cat:"建筑"},
+{cn:"兵马俑",en:"the Terracotta Warriors",cat:"建筑"},
+{cn:"丝绸之路",en:"the Silk Road",cat:"历史"},
+{cn:"京剧",en:"Peking Opera / Beijing Opera",cat:"艺术"},
+{cn:"书法",en:"calligraphy",cat:"艺术"},
+{cn:"国画",en:"traditional Chinese painting",cat:"艺术"},
+{cn:"剪纸",en:"paper-cutting",cat:"艺术"},
+{cn:"刺绣",en:"embroidery",cat:"艺术"},
+{cn:"陶瓷",en:"porcelain / ceramics",cat:"艺术"},
+{cn:"武术",en:"martial arts / kung fu / wushu",cat:"艺术"},
+{cn:"太极拳",en:"Tai Chi",cat:"艺术"},
+{cn:"中医",en:"traditional Chinese medicine (TCM)",cat:"文化"},
+{cn:"针灸",en:"acupuncture",cat:"文化"},
+{cn:"草药",en:"herbal medicine",cat:"文化"},
+{cn:"拔罐",en:"cupping therapy",cat:"文化"},
+{cn:"推拿",en:"massage / tuina",cat:"文化"},
+{cn:"筷子",en:"chopsticks",cat:"饮食"},
+{cn:"饺子",en:"dumplings / jiaozi",cat:"饮食"},
+{cn:"包子",en:"steamed buns / baozi",cat:"饮食"},
+{cn:"月饼",en:"mooncake",cat:"饮食"},
+{cn:"粽子",en:"zongzi / rice dumpling",cat:"饮食"},
+{cn:"汤圆",en:"sweet rice ball / tangyuan",cat:"饮食"},
+{cn:"茶",en:"tea",cat:"饮食"},
+{cn:"白酒",en:"Chinese liquor / baijiu",cat:"饮食"},
+{cn:"旗袍",en:"cheongsam / qipao",cat:"服饰"},
+{cn:"唐装",en:"Tang suit",cat:"服饰"},
+{cn:"汉服",en:"Hanfu",cat:"服饰"},
+{cn:"四大发明",en:"the Four Great Inventions",cat:"历史"},
+{cn:"造纸术",en:"papermaking",cat:"历史"},
+{cn:"印刷术",en:"printing",cat:"历史"},
+{cn:"火药",en:"gunpowder",cat:"历史"},
+{cn:"指南针",en:"the compass",cat:"历史"},
+{cn:"儒家思想",en:"Confucianism",cat:"哲学"},
+{cn:"孔子",en:"Confucius",cat:"哲学"},
+{cn:"道家",en:"Taoism",cat:"哲学"},
+{cn:"老子",en:"Lao Tzu / Laozi",cat:"哲学"},
+{cn:"阴阳",en:"yin and yang",cat:"哲学"},
+{cn:"风水",en:"feng shui",cat:"哲学"}
+];
+
+const cultureSentences = [
+{cn:"...有着悠久的历史",en:"...has a long history / ...boasts a long history"},
+{cn:"...是中国传统文化的重要组成部分",en:"...is an important part of Chinese traditional culture"},
+{cn:"...深受人们的喜爱",en:"...is deeply loved by people"},
+{cn:"...象征着吉祥/幸福/团圆",en:"...symbolizes good luck / happiness / reunion"},
+{cn:"随着生活水平的提高...",en:"With the improvement of living standards..."},
+{cn:"在当今社会...",en:"In modern society / In today's society..."},
+{cn:"...吸引了来自世界各地的游客",en:"...attracts tourists from all over the world"},
+{cn:"...体现了中国人的智慧和创造力",en:"...reflects the wisdom and creativity of the Chinese people"},
+{cn:"...被列为世界文化遗产",en:"...is listed as a World Cultural Heritage site"},
+{cn:"传承和发扬...",en:"inherit and carry forward..."}
+];
+
+const cultureQuizDB = [
+{q:"中国的四大发明不包括以下哪一项？",options:["造纸术","地动仪","火药","指南针"],a:1,exp:"四大发明是造纸术、印刷术、火药、指南针，地动仪是张衡发明的地震检测仪器。"},
+{q:"京剧形成于哪个朝代？",options:["唐朝","宋朝","明朝","清朝"],a:3,exp:"京剧形成于清朝乾隆年间（1790年四大徽班进京），在道光年间正式形成。"},
+{q:"以下哪个节日与屈原有关？",options:["春节","端午节","中秋节","重阳节"],a:1,exp:"端午节是为了纪念爱国诗人屈原，有吃粽子、赛龙舟的习俗。"},
+{q:"丝绸之路的起点是哪里？",options:["北京","西安（长安）","洛阳","敦煌"],a:1,exp:"丝绸之路的起点是西汉时期的长安，即今天的西安。"},
+{q:"以下哪项不是中国二十四节气之一？",options:["立春","清明","冬至","花朝"],a:3,exp:"花朝节是传统节日但不是二十四节气。二十四节气包括立春、雨水、惊蛰、春分、清明、谷雨等。"}
+];
+
+const hotTopics = {
+tech:[
+  {w:"artificial intelligence",m:"人工智能",e:"Artificial intelligence is transforming many industries."},
+  {w:"big data",m:"大数据",e:"Big data helps companies understand customer behavior."},
+  {w:"cloud computing",m:"云计算",e:"Cloud computing allows users to store data online."},
+  {w:"5G network",m:"5G网络",e:"The 5G network offers much faster internet speed."},
+  {w:"smartphone",m:"智能手机",e:"Almost everyone owns a smartphone nowadays."},
+  {w:"virtual reality",m:"虚拟现实",e:"Virtual reality creates immersive digital experiences."},
+  {w:"blockchain",m:"区块链",e:"Blockchain technology ensures data security."},
+  {w:"e-commerce",m:"电子商务",e:"E-commerce has changed the way people shop."}
+],
+env:[
+  {w:"carbon neutrality",m:"碳中和",e:"China aims to achieve carbon neutrality by 2060."},
+  {w:"renewable energy",m:"可再生能源",e:"Solar and wind are forms of renewable energy."},
+  {w:"waste sorting",m:"垃圾分类",e:"Waste sorting has been implemented in many Chinese cities."},
+  {w:"air pollution",m:"空气污染",e:"Air pollution is a serious problem in big cities."},
+  {w:"sustainable development",m:"可持续发展",e:"Sustainable development balances economy and environment."},
+  {w:"greenhouse effect",m:"温室效应",e:"The greenhouse effect causes global warming."},
+  {w:"biodiversity",m:"生物多样性",e:"We must protect biodiversity for future generations."},
+  {w:"low-carbon lifestyle",m:"低碳生活",e:"A low-carbon lifestyle helps reduce carbon emissions."}
+],
+edu:[
+  {w:"online education",m:"在线教育",e:"Online education became popular during the pandemic."},
+  {w:"lifelong learning",m:"终身学习",e:"Lifelong learning is essential in the modern world."},
+  {w:"critical thinking",m:"批判性思维",e:"Schools should teach students critical thinking skills."},
+  {w:"comprehensive quality",m:"综合素质",e:"Universities now value students' comprehensive quality."},
+  {w:"postgraduate entrance exam",m:"考研",e:"Many students take the postgraduate entrance exam."},
+  {w:"study abroad",m:"出国留学",e:"More students choose to study abroad for better education."},
+  {w:"vocational education",m:"职业教育",e:"Vocational education trains skilled workers."},
+  {w:"digital literacy",m:"数字素养",e:"Digital literacy is important for everyone today."}
+],
+social:[
+  {w:"aging population",m:"人口老龄化",e:"The aging population is a challenge for many countries."},
+  {w:"employment pressure",m:"就业压力",e:"College graduates face great employment pressure."},
+  {w:"medical insurance",m:"医疗保险",e:"Medical insurance helps people afford healthcare."},
+  {w:"social security",m:"社会保障",e:"Social security provides basic living guarantees."},
+  {w:"urbanization",m:"城市化",e:"Rapid urbanization has changed rural areas greatly."},
+  {w:"income gap",m:"收入差距",e:"The government is working to reduce the income gap."},
+  {w:"public welfare",m:"公共福利",e:"Public welfare programs help vulnerable groups."},
+  {w:"community service",m:"社区服务",e:"Community service builds stronger neighborhoods."}
+],
+econ:[
+  {w:"digital economy",m:"数字经济",e:"The digital economy drives modern economic growth."},
+  {w:"sharing economy",m:"共享经济",e:"Bike-sharing is a typical example of the sharing economy."},
+  {w:"rural revitalization",m:"乡村振兴",e:"Rural revitalization improves farmers' living standards."},
+  {w:"high-quality development",m:"高质量发展",e:"China pursues high-quality development rather than just speed."},
+  {w:"domestic demand",m:"内需",e:"Expanding domestic demand boosts economic growth."},
+  {w:"supply chain",m:"供应链",e:"The pandemic disrupted global supply chains."},
+  {w:"startup",m:"创业公司",e:"Many young people choose to work at startups."},
+  {w:"foreign investment",m:"外资",e:"Foreign investment brings capital and technology."}
+],
+health:[
+  {w:"physical exercise",m:"体育锻炼",e:"Regular physical exercise keeps you healthy."},
+  {w:"mental health",m:"心理健康",e:"Mental health is as important as physical health."},
+  {w:"balanced diet",m:"均衡饮食",e:"A balanced diet includes vegetables, fruits, and protein."},
+  {w:"work-life balance",m:"工作与生活的平衡",e:"Maintaining work-life balance reduces stress."},
+  {w:"healthcare system",m:"医疗体系",e:"The healthcare system needs continuous improvement."},
+  {w:"epidemic prevention",m:"防疫",e:"Epidemic prevention requires everyone's participation."},
+  {w:"traditional Chinese medicine",m:"中医",e:"Traditional Chinese medicine has a long history."},
+  {w:"sub-health",m:"亚健康",m:"Many office workers are in a state of sub-health."}
+]
+};
+
+const jingleiDB = [
+{text:"The Internet has changed the way we live. It allows us to communicate with people around the world instantly. However, we should also be aware of its risks. Spending too much time online can affect our health and relationships. We need to find a healthy balance.",
+ blanks:[{word:"changed",hint:"改变(过去式)"},{word:"instantly",hint:"立即"},{word:"aware",hint:"意识到的"},{word:"affect",hint:"影响"},{word:"balance",hint:"平衡"}]},
+{text:"Reading is one of the best habits a person can develop. It opens up new worlds and ideas. People who read regularly tend to have better vocabulary and communication skills. Libraries are great places to discover new books and meet other readers.",
+ blanks:[{word:"habits",hint:"习惯(复数)"},{word:"opens",hint:"打开(三单)"},{word:"regularly",hint:"定期地"},{word:"vocabulary",hint:"词汇"},{word:"discover",hint:"发现"}]},
+{text:"Environmental protection is everyone's responsibility. We can start with small actions like reducing plastic use and saving water. Schools should teach children about the importance of protecting nature. If everyone makes an effort, we can create a better future for the next generation.",
+ blanks:[{word:"responsibility",hint:"责任"},{word:"reducing",hint:"减少(动名词)"},{word:"importance",hint:"重要性"},{word:"protecting",hint:"保护(动名词)"},{word:"generation",hint:"一代人"}]}
+];
+
+const mockReadDB = [
+{passage:"The concept of work-life balance has become increasingly important in modern society. Many people find themselves working longer hours than ever before, often checking emails and taking calls outside of office hours. This 'always-on' culture can lead to burnout, a state of chronic stress that affects both physical and mental health.\n\nCompanies are beginning to recognize the problem. Some have introduced flexible working hours, allowing employees to choose when they start and finish work. Others have implemented 'right to disconnect' policies, which prevent employers from contacting staff during their free time.\n\nHowever, achieving true work-life balance requires effort from both employers and employees. Individuals need to set clear boundaries between work and personal life. This might mean turning off work notifications after 6 p.m. or dedicating weekends entirely to family and hobbies.\n\nResearch suggests that people with good work-life balance are more productive, creative, and loyal to their employers. They also report higher levels of life satisfaction. As the saying goes, 'Work to live, don't live to work.'",
+ questions:[
+  {q:"What is the main cause of burnout according to the passage?",options:["Low salaries","Long working hours and 'always-on' culture","Lack of vacation time","Poor workplace relationships"],a:1,exp:"原文提到'working longer hours...often checking emails...outside of office hours'以及'This always-on culture can lead to burnout.'"},
+  {q:"What have some companies done to address this problem?",options:["Increased salaries","Reduced working days to four","Introduced flexible hours and 'right to disconnect' policies","Hired more staff"],a:2,exp:"原文'Some have introduced flexible working hours...Others have implemented right to disconnect policies.'"},
+  {q:"What does the passage suggest individuals should do?",options:["Change jobs frequently","Set clear boundaries between work and personal life","Work overtime to get promoted","Avoid taking vacations"],a:1,exp:"原文'Individuals need to set clear boundaries between work and personal life.'"},
+  {q:"What is the benefit of good work-life balance mentioned in the passage?",options:["Higher salary","More vacation days","More productive and creative","Better office location"],a:2,exp:"原文'people with good work-life balance are more productive, creative, and loyal.'"}
+ ]}
+];
+
+// ==================== 全局状态 ====================
+let currentState = {
+  vocabMode: '',
+  vocabIndex: 0,
+  vocabList: [],
+  vocabCorrect: 0,
+  vocabTotal: 0,
+  listenIndex: 0,
+  listenQIndex: 0,
+  listenCorrect: 0,
+  grammarIndex: 0,
+  grammarCorrect: 0,
+  grammarList: [],
+  transIndex: 0,
+  writingIndex: 0,
+  cultureIndex: 0,
+  flashIndex: 0,
+  mistakeCount: 0
+};
+
+// ==================== 工具函数 ====================
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getMistakes() {
+  try { return JSON.parse(localStorage.getItem('cet4_mistakes') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveMistake(item) {
+  const m = getMistakes();
+  m.push({...item, time: new Date().toLocaleString()});
+  localStorage.setItem('cet4_mistakes', JSON.stringify(m));
+  updateStats();
+}
+
+function clearMistakes() {
+  localStorage.setItem('cet4_mistakes', '[]');
+  updateStats();
+}
+
+function getLearned() {
+  try { return parseInt(localStorage.getItem('cet4_learned') || '0'); }
+  catch(e) { return 0; }
+}
+
+function addLearned(n) {
+  localStorage.setItem('cet4_learned', String(getLearned() + n));
+  updateStats();
+}
+
+function getDone() {
+  try { return parseInt(localStorage.getItem('cet4_done') || '0'); }
+  catch(e) { return 0; }
+}
+
+function addDone(n) {
+  localStorage.setItem('cet4_done', String(getDone() + n));
+  updateStats();
+}
+
+function getAccuracy() {
+  const correct = parseInt(localStorage.getItem('cet4_correct') || '0');
+  const total = parseInt(localStorage.getItem('cet4_total') || '0');
+  if (total === 0) return '--';
+  return Math.round(correct / total * 100) + '%';
+}
+
+function addAccuracy(c, t) {
+  const correct = parseInt(localStorage.getItem('cet4_correct') || '0') + c;
+  const total = parseInt(localStorage.getItem('cet4_total') || '0') + t;
+  localStorage.setItem('cet4_correct', String(correct));
+  localStorage.setItem('cet4_total', String(total));
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('stat-learned').textContent = getLearned();
+  document.getElementById('stat-done').textContent = getDone();
+  document.getElementById('stat-accuracy').textContent = getAccuracy();
+  const days = Math.ceil((new Date('2026-12-19') - new Date()) / (1000*60*60*24));
+  document.getElementById('stat-days').textContent = (days > 0 ? days : 0) + '天';
+}
+
+// ==================== 面板切换 ====================
+function sp(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + n).classList.add('active');
+  updateStats();
+}
+
+// ==================== 词汇训练 ====================
+function startVocab(mode) {
+  const ws = document.getElementById('vocab-workspace');
+  currentState.vocabMode = mode;
+  currentState.vocabIndex = 0;
+  currentState.vocabCorrect = 0;
+
+  if (mode === 'flash') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 20);
+    currentState.flashIndex = 0;
+    renderFlashcard(ws);
+    return;
+  }
+
+  if (mode === 'new10') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    let html = '<div class="quiz-area">';
+    currentState.vocabList.forEach((v, i) => {
+      html += `<div style="padding:10px;border-bottom:1px solid #d4e8e0;">
+        <div style="font-weight:700;color:#4a6b5e;">${v.w} <span style="color:#7db8a8;font-size:11px;">[${v.p}]</span></div>
+        <div style="color:#5a7a6e;font-size:13px;margin-top:4px;">${v.m}</div>
+        <div style="color:#a8c4b8;font-size:11px;margin-top:4px;font-style:italic;">${v.e}</div>
+      </div>`;
+    });
+    html += '</div><div class="control-bar"><button onclick="startVocab('flash')">🃏 闪卡复习这10个</button></div>';
+    ws.innerHTML = html;
+    addLearned(10);
+    return;
+  }
+
+  if (mode === 'cn2en') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    currentState.vocabTotal = 10;
+    renderCn2En(ws);
+    return;
+  }
+
+  if (mode === 'en2cn') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 10);
+    currentState.vocabTotal = 10;
+    renderEn2Cn(ws);
+    return;
+  }
+}
+
+function renderFlashcard(ws) {
+  const v = currentState.vocabList[currentState.flashIndex];
+  const progress = Math.round((currentState.flashIndex / currentState.vocabList.length) * 100);
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.flashIndex + 1} / ${currentState.vocabList.length}</div>
+      <div class="score-tag">已学: ${getLearned()}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="flashcard" onclick="toggleFlash(this)">
+      <div class="cn">${v.m}</div>
+      <div class="en">${v.w}</div>
+      <div class="pos">[${v.p}] ${v.e}</div>
+    </div>
+    <div class="control-bar">
+      <button class="secondary" onclick="prevFlash()">⬅️ 上一个</button>
+      <button onclick="nextFlash()">下一个 ➡️</button>
+    </div>
+  `;
+}
+
+function toggleFlash(el) {
+  el.querySelector('.en').classList.toggle('show');
+  el.querySelector('.pos').classList.toggle('show');
+}
+
+function nextFlash() {
+  if (currentState.flashIndex < currentState.vocabList.length - 1) {
+    currentState.flashIndex++;
+    renderFlashcard(document.getElementById('vocab-workspace'));
+  } else {
+    addLearned(currentState.vocabList.length);
+    document.getElementById('vocab-workspace').innerHTML = 
+      '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">闪卡复习完成！</div><div style="color:#7db8a8;margin-top:8px;">已学习 ' + currentState.vocabList.length + ' 个单词</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab('flash')">再来一组</button></div>';
+  }
+}
+
+function prevFlash() {
+  if (currentState.flashIndex > 0) {
+    currentState.flashIndex--;
+    renderFlashcard(document.getElementById('vocab-workspace'));
+  }
+}
+
+function renderCn2En(ws) {
+  const v = currentState.vocabList[currentState.vocabIndex];
+  const progress = Math.round((currentState.vocabIndex / currentState.vocabTotal) * 100);
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.vocabIndex + 1} / ${currentState.vocabTotal}</div>
+      <div class="score-tag">正确: ${currentState.vocabCorrect}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="quiz-area">
+      <div class="quiz-question">请写出英文单词：<br><span style="color:#7db8a8;font-size:18px;">${v.m} [${v.p}]</span></div>
+      <input type="text" class="vocab-input" id="vocab-answer" placeholder="输入英文单词..." onkeypress="if(event.key==='Enter')checkCn2En()">
+      <button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);" onclick="checkCn2En()">提交</button>
+      <div id="vocab-feedback"></div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('vocab-answer').focus(), 100);
+}
+
+function checkCn2En() {
+  const input = document.getElementById('vocab-answer').value.trim().toLowerCase();
+  const v = currentState.vocabList[currentState.vocabIndex];
+  const fb = document.getElementById('vocab-feedback');
+  if (!input) return;
+
+  const correct = input === v.w.toLowerCase();
+  if (correct) {
+    currentState.vocabCorrect++;
+    fb.innerHTML = '<div class="vocab-check" style="background:#e8f5e9;color:#2e7d32;">✅ 正确！' + v.w + ' [' + v.p + ']<br><span style="font-size:12px;color:#5a9e8a;">' + v.e + '</span></div>';
+    addAccuracy(1, 1);
+  } else {
+    fb.innerHTML = '<div class="vocab-check" style="background:#fdecea;color:#c0392b;">❌ 错误！正确答案是：<b>' + v.w + '</b> [' + v.p + ']<br><span style="font-size:12px;">' + v.e + '</span></div>';
+    saveMistake({type:'词汇',q:v.m + ' → ?',a:v.w});
+    addAccuracy(0, 1);
+  }
+
+  setTimeout(() => {
+    currentState.vocabIndex++;
+    if (currentState.vocabIndex < currentState.vocabTotal) {
+      renderCn2En(document.getElementById('vocab-workspace'));
+    } else {
+      finishVocab('中→英听写');
+    }
+  }, 1500);
+}
+
+function renderEn2Cn(ws) {
+  const v = currentState.vocabList[currentState.vocabIndex];
+  // 生成3个错误选项
+  const others = shuffle(vocabDB.filter(x => x.w !== v.w)).slice(0, 3);
+  const options = shuffle([{t:v.m,c:true}, ...others.map(o => ({t:o.m,c:false}))]);
+  const progress = Math.round((currentState.vocabIndex / currentState.vocabTotal) * 100);
+
+  let optHtml = '';
+  options.forEach((opt, i) => {
+    optHtml += `<div class="quiz-option" onclick="checkEn2Cn(${i},${opt.c},this)" data-c="${opt.c}">${opt.t}</div>`;
+  });
+
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.vocabIndex + 1} / ${currentState.vocabTotal}</div>
+      <div class="score-tag">正确: ${currentState.vocabCorrect}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="quiz-area">
+      <div class="quiz-question">请选择中文释义：<br><span style="color:#7db8a8;font-size:20px;">${v.w}</span> <span style="font-size:12px;color:#a8c4b8;">[${v.p}]</span></div>
+      <div class="quiz-options">${optHtml}</div>
+      <div id="vocab-feedback"></div>
+    </div>
+  `;
+}
+
+function checkEn2Cn(idx, correct, el) {
+  const opts = document.querySelectorAll('#vocab-workspace .quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const v = currentState.vocabList[currentState.vocabIndex];
+
+  if (correct) {
+    el.classList.add('correct');
+    currentState.vocabCorrect++;
+    document.getElementById('vocab-feedback').innerHTML = '<div class="quiz-result correct">✅ 正确！' + v.w + ' = ' + v.m + '<br><span style="font-size:12px;">' + v.e + '</span></div>';
+    addAccuracy(1, 1);
+  } else {
+    el.classList.add('wrong');
+    opts.forEach(o => { if (o.dataset.c === 'true') o.classList.add('correct'); });
+    document.getElementById('vocab-feedback').innerHTML = '<div class="quiz-result wrong">❌ 错误！正确答案是：<b>' + v.m + '</b><br><span style="font-size:12px;">' + v.e + '</span></div>';
+    saveMistake({type:'词汇',q:v.w + ' = ?',a:v.m});
+    addAccuracy(0, 1);
+  }
+
+  setTimeout(() => {
+    currentState.vocabIndex++;
+    if (currentState.vocabIndex < currentState.vocabTotal) {
+      renderEn2Cn(document.getElementById('vocab-workspace'));
+    } else {
+      finishVocab('英→中默写');
+    }
+  }, 1800);
+}
+
+function finishVocab(modeName) {
+  const acc = Math.round(currentState.vocabCorrect / currentState.vocabTotal * 100);
+  document.getElementById('vocab-workspace').innerHTML = 
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">' + modeName + ' 完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.vocabCorrect + '/' + currentState.vocabTotal + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab('' + currentState.vocabMode + '')">再来一组</button></div>';
+  addDone(currentState.vocabTotal);
+  addLearned(currentState.vocabTotal);
+}
+
+// ==================== 高频词特训 ====================
+function startHighfreq(mode) {
+  const ws = document.getElementById('highfreq-workspace');
+  if (mode === 'phrase') {
+    const list = shuffle(phraseDB).slice(0, 10);
+    let html = '<div class="quiz-area">';
+    list.forEach((p, i) => {
+      html += `<div style="padding:12px;border-bottom:1px solid #d4e8e0;">
+        <div style="font-weight:700;color:#4a6b5e;font-size:14px;">${i+1}. ${p.p}</div>
+        <div style="color:#5a7a6e;font-size:13px;margin-top:4px;">意思：${p.m}</div>
+        <div style="color:#a8c4b8;font-size:11px;margin-top:4px;font-style:italic;">例句：${p.e}</div>
+      </div>`;
+    });
+    html += '</div>';
+    ws.innerHTML = html;
+    addLearned(10);
+  } else if (mode === 'word') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 15);
+    currentState.vocabIndex = 0;
+    currentState.vocabCorrect = 0;
+    currentState.vocabTotal = 15;
+    currentState.vocabMode = 'word';
+    renderEn2Cn(ws);
+  }
+}
+
+// ==================== 听力训练 ====================
+function startListen(type) {
+  const ws = document.getElementById('listen-workspace');
+  if (type === 'jinglei') {
+    const item = shuffle(jingleiDB)[0];
+    currentState.listenIndex = 0;
+    currentState.listenCorrect = 0;
+    renderJinglei(ws, item);
+    return;
+  }
+
+  const items = listeningDB.filter(x => x.type === type);
+  if (items.length === 0) { ws.innerHTML = '<div class="quiz-area">暂无该类型题目</div>'; return; }
+  const item = shuffle(items)[0];
+  currentState.listenIndex = 0;
+  currentState.listenQIndex = 0;
+  currentState.listenCorrect = 0;
+  currentState.listenItem = item;
+  renderListen(ws, item);
+}
+
+function renderListen(ws, item) {
+  const q = item.questions[currentState.listenQIndex];
+  const progress = Math.round((currentState.listenQIndex / item.questions.length) * 100);
+
+  let optHtml = '';
+  q.options.forEach((opt, i) => {
+    optHtml += `<div class="listen-option" onclick="checkListen(${i},${i===q.answer},this)" data-c="${i===q.answer}">${opt}</div>`;
+  });
+
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">题目 ${currentState.listenQIndex + 1}/${item.questions.length}</div>
+      <div class="score-tag">正确: ${currentState.listenCorrect}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="listen-text"><b>🎧 ${item.title}</b><br><br>${item.text.replace(/\n/g,'<br>')}</div>
+    <div class="listen-question">Question: ${q.q}</div>
+    <div class="listen-options">${optHtml}</div>
+    <div class="answer-reveal" id="listen-reveal"><b>解析：</b>${q.exp}</div>
+  `;
+}
+
+function checkListen(idx, correct, el) {
+  const opts = document.querySelectorAll('#listen-workspace .listen-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const item = currentState.listenItem;
+  const q = item.questions[currentState.listenQIndex];
+
+  if (correct) {
+    el.classList.add('correct');
+    currentState.listenCorrect++;
+    addAccuracy(1, 1);
+  } else {
+    el.classList.add('wrong');
+    opts.forEach(o => { if (o.dataset.c === 'true') o.classList.add('correct'); });
+    saveMistake({type:'听力',q:item.title + ' - ' + q.q,a:q.options[q.answer]});
+    addAccuracy(0, 1);
+  }
+
+  document.getElementById('listen-reveal').classList.add('show');
+
+  setTimeout(() => {
+    currentState.listenQIndex++;
+    if (currentState.listenQIndex < item.questions.length) {
+      renderListen(document.getElementById('listen-workspace'), item);
+    } else {
+      finishListen();
+    }
+  }, 2500);
+}
+
+function finishListen() {
+  const total = currentState.listenItem.questions.length;
+  const acc = Math.round(currentState.listenCorrect / total * 100);
+  document.getElementById('listen-workspace').innerHTML = 
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">听力练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.listenCorrect + '/' + total + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#6aaa9a,#4a8a7a);margin-top:15px;" onclick="document.getElementById('listen-workspace').innerHTML=''">再来一套</button></div>';
+  addDone(total);
+}
+
+function renderJinglei(ws, item) {
+  let html = '<div class="quiz-area">';
+  html += '<div class="tip" style="background:rgba(106,170,154,0.08);border-color:#6aaa9a;color:#4a8a7a;">💡 请根据上下文，填写空缺的单词。</div>';
+  html += '<div class="listen-text">' + item.text + '</div>';
+  html += '<div style="margin-top:12px;">';
+  item.blanks.forEach((b, i) => {
+    html += `<div style="margin-bottom:8px;"><span style="font-weight:700;color:#4a6b5e;">空${i+1} (${b.hint})：</span><input type="text" id="jl-${i}" style="width:200px;display:inline-block;" placeholder="填写单词..."></div>`;
+  });
+  html += '</div>';
+  html += '<button class="full-btn" style="background:linear-gradient(135deg,#6aaa9a,#4a8a7a);margin-top:10px;" onclick="checkJinglei()">提交答案</button>';
+  html += '<div id="jl-feedback"></div>';
+  html += '</div>';
+  ws.innerHTML = html;
+}
+
+function checkJinglei() {
+  const item = jingleiDB.find(x => x.text === document.querySelector('.listen-text').innerText.replace(/<br>/g,'\n').replace(/<b>|<\/b>/g,''));
+  if (!item) return;
+  let correct = 0;
+  let html = '<div style="margin-top:12px;">';
+  item.blanks.forEach((b, i) => {
+    const val = document.getElementById('jl-'+i).value.trim().toLowerCase();
+    const isCorrect = val === b.word.toLowerCase();
+    if (isCorrect) correct++;
+    html += `<div style="padding:6px;border-radius:4px;margin-bottom:4px;background:${isCorrect?'#e8f5e9':'#fdecea'};color:${isCorrect?'#2e7d32':'#c0392b'};font-size:13px;">
+      空${i+1}: ${isCorrect?'✅':'❌'} 你的答案: <b>${val||'(空)'}</b> | 正确答案: <b>${b.word}</b>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('jl-feedback').innerHTML = html;
+  addAccuracy(correct, item.blanks.length);
+  addDone(item.blanks.length);
+}
+
+// ==================== 语法训练 ====================
+function startGrammar(mode) {
+  const ws = document.getElementById('grammar-workspace');
+  currentState.grammarList = mode === 'diag' ? shuffle(grammarDB).slice(0, 10) : shuffle(grammarDB);
+  currentState.grammarIndex = 0;
+  currentState.grammarCorrect = 0;
+  renderGrammar(ws);
+}
+
+function renderGrammar(ws) {
+  const q = currentState.grammarList[currentState.grammarIndex];
+  const progress = Math.round((currentState.grammarIndex / currentState.grammarList.length) * 100);
+
+  let optHtml = '';
+  q.options.forEach((opt, i) => {
+    optHtml += `<div class="quiz-option" onclick="checkGrammar(${i},${i===q.a},this)" data-c="${i===q.a}">${opt}</div>`;
+  });
+
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.grammarIndex + 1} / ${currentState.grammarList.length}</div>
+      <div class="score-tag">正确: ${currentState.grammarCorrect}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="quiz-area">
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-options">${optHtml}</div>
+      <div id="grammar-feedback"></div>
+    </div>
+  `;
+}
+
+function checkGrammar(idx, correct, el) {
+  const opts = document.querySelectorAll('#grammar-workspace .quiz-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const q = currentState.grammarList[currentState.grammarIndex];
+
+  if (correct) {
+    el.classList.add('correct');
+    currentState.grammarCorrect++;
+    document.getElementById('grammar-feedback').innerHTML = '<div class="quiz-result correct">✅ 正确！</div>';
+    addAccuracy(1, 1);
+  } else {
+    el.classList.add('wrong');
+    opts.forEach(o => { if (o.dataset.c === 'true') o.classList.add('correct'); });
+    document.getElementById('grammar-feedback').innerHTML = '<div class="quiz-result wrong">❌ 错误！<br><b>解析：</b>' + q.exp + '</div>';
+    saveMistake({type:'语法',q:q.q,a:q.options[q.a] + ' | ' + q.exp});
+    addAccuracy(0, 1);
+  }
+
+  setTimeout(() => {
+    currentState.grammarIndex++;
+    if (currentState.grammarIndex < currentState.grammarList.length) {
+      renderGrammar(document.getElementById('grammar-workspace'));
+    } else {
+      finishGrammar();
+    }
+  }, 2500);
+}
+
+function finishGrammar() {
+  const total = currentState.grammarList.length;
+  const acc = Math.round(currentState.grammarCorrect / total * 100);
+  let msg = acc >= 80 ? '太棒了！语法基础很扎实！' : acc >= 60 ? '还不错，继续加油！' : '需要加强，建议多复习错题本！';
+  document.getElementById('grammar-workspace').innerHTML = 
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">语法练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.grammarCorrect + '/' + total + ' (' + acc + '%)</div><div style="color:#a07858;margin-top:6px;font-size:13px;">' + msg + '</div><button class="full-btn" style="background:linear-gradient(135deg,#a8a080,#908868);margin-top:15px;" onclick="startGrammar('diag')">再来一组</button></div>';
+  addDone(total);
+}
+
+// ==================== 翻译训练 ====================
+function startTrans() {
+  const ws = document.getElementById('trans-workspace');
+  const idx = Math.floor(Math.random() * translationDB.length);
+  currentState.transIndex = idx;
+  const t = translationDB[idx];
+
+  ws.innerHTML = `
+    <div class="quiz-area">
+      <div class="timer" id="trans-timer">15:00</div>
+      <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 请将以下中文段落翻译成英文，限时15分钟。完成后点击"查看范文"对照。</div>
+      <div style="background:#f8fcfa;padding:12px;border-radius:8px;font-size:13px;line-height:1.8;color:#4a6b5e;margin-bottom:10px;">${t.cn}</div>
+      <textarea class="trans-input" id="trans-answer" placeholder="在此输入你的英文译文..."></textarea>
+      <button class="full-btn" style="background:linear-gradient(135deg,#7db8a8,#5a9e8a);" onclick="showTransModel()">查看范文与评分</button>
+      <div class="model-answer" id="trans-model">
+        <h4>📝 满分范文</h4>
+        <div style="color:#4a6b5e;line-height:1.8;">${t.en}</div>
+        <div class="keywords-check">
+          <h4 style="margin-top:10px;">🔑 关键词对照</h4>
+          <div id="trans-keywords"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 15分钟倒计时
+  let sec = 900;
+  const timerEl = document.getElementById('trans-timer');
+  window.transTimer = setInterval(() => {
+    sec--;
+    if (sec <= 0) { clearInterval(window.transTimer); timerEl.textContent = "时间到！"; timerEl.style.color = "#e74c3c"; }
+    else {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+  }, 1000);
+}
+
+function showTransModel() {
+  if (window.transTimer) clearInterval(window.transTimer);
+  const t = translationDB[currentState.transIndex];
+  const userAns = document.getElementById('trans-answer').value.toLowerCase();
+  document.getElementById('trans-model').classList.add('show');
+
+  let kwHtml = '';
+  let hitCount = 0;
+  t.keywords.forEach(k => {
+    const hit = userAns.includes(k.toLowerCase());
+    if (hit) hitCount++;
+    kwHtml += `<span class="keyword-tag ${hit?'hit':'miss'}">${hit?'✅':'❌'} ${k}</span>`;
+  });
+  const score = Math.round(hitCount / t.keywords.length * 100);
+  kwHtml += `<div style="margin-top:8px;font-weight:700;color:${score>=60?'#5a9e8a':'#c0392b'};">关键词覆盖率：${hitCount}/${t.keywords.length} (${score}%)</div>`;
+  kwHtml += `<div style="margin-top:6px;color:#7db8a8;font-size:12px;">${score>=80?'优秀！翻译很到位！':score>=60?'不错，再注意一些细节！':'建议对照范文，学习关键词的英文表达。'}</div>`;
+  document.getElementById('trans-keywords').innerHTML = kwHtml;
+  addDone(1);
+}
+
+// ==================== 写作训练 ====================
+function startWriting() {
+  const ws = document.getElementById('writing-workspace');
+  const idx = Math.floor(Math.random() * writingDB.length);
+  currentState.writingIndex = idx;
+  const w = writingDB[idx];
+
+  ws.innerHTML = `
+    <div class="quiz-area">
+      <div class="timer" id="write-timer">30:00</div>
+      <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:8px;">📝 ${w.title}</div>
+      <div style="background:#f8fcfa;padding:10px;border-radius:8px;font-size:12px;color:#5a7a6e;margin-bottom:10px;">
+        <b>写作思路：</b><br>${w.outline.replace(/\n/g,'<br>')}
+      </div>
+      <textarea class="essay-input" id="write-answer" placeholder="在此输入你的作文（建议120-180词）..."></textarea>
+      <button class="full-btn" style="background:linear-gradient(135deg,#a8a080,#908868);" onclick="showWritingModel()">查看范文与自评</button>
+      <div class="model-answer" id="write-model">
+        <h4>📝 参考范文</h4>
+        <div style="color:#4a6b5e;line-height:1.8;white-space:pre-wrap;">${w.sample}</div>
+        <div style="margin-top:12px;padding:10px;background:#fff8e1;border-radius:6px;font-size:12px;color:#8a8060;">
+          <b>💡 自评清单：</b><br>
+          ✅ 是否包含开头、主体、结尾三段？<br>
+          ✅ 字数是否在120-180之间？<br>
+          ✅ 是否有明显的语法错误？<br>
+          ✅ 是否使用了连接词（however, therefore, in addition等）？<br>
+          ✅ 结尾是否有明确的观点总结？
+        </div>
+      </div>
+    </div>
+  `;
+
+  let sec = 1800;
+  const timerEl = document.getElementById('write-timer');
+  window.writeTimer = setInterval(() => {
+    sec--;
+    if (sec <= 0) { clearInterval(window.writeTimer); timerEl.textContent = "时间到！"; timerEl.style.color = "#e74c3c"; }
+    else {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+  }, 1000);
+}
+
+function showWritingModel() {
+  if (window.writeTimer) clearInterval(window.writeTimer);
+  document.getElementById('write-model').classList.add('show');
+  addDone(1);
+}
+
+function showTemplate() {
+  const ws = document.getElementById('writing-workspace');
+  ws.innerHTML = `
+    <div class="quiz-area">
+      <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">📄 万能议论文框架</div>
+      <div style="background:#f8fcfa;padding:12px;border-radius:8px;font-size:13px;line-height:2;color:#4a6b5e;margin-bottom:12px;">
+        <b>第一段：引出话题 + 表明观点</b><br>
+        In recent years, [话题] has become increasingly important / popular / controversial. From my perspective, [你的观点].<br><br>
+        <b>第二段：论据1 + 论据2（+论据3）</b><br>
+        On the one hand, [理由1]. For example, [例子].<br>
+        On the other hand, [理由2]. This is because [解释].<br><br>
+        <b>第三段：让步/反面（可选）</b><br>
+        However, some people argue that [反面观点]. While this view has some merit, I believe that [反驳/补充].<br><br>
+        <b>第四段：总结</b><br>
+        In conclusion, [重申观点]. Only by [措施/建议] can we [美好愿景].
+      </div>
+      <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">🔄 10个高级替换词</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>very good</b> → <span style="color:#5a9e8a;">excellent / remarkable / outstanding</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>important</b> → <span style="color:#5a9e8a;">crucial / vital / essential</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>think</b> → <span style="color:#5a9e8a;">maintain / argue / believe</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>show</b> → <span style="color:#5a9e8a;">demonstrate / illustrate / reveal</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>use</b> → <span style="color:#5a9e8a;">utilize / employ / adopt</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>help</b> → <span style="color:#5a9e8a;">facilitate / assist / contribute to</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>big</b> → <span style="color:#5a9e8a;">significant / substantial / considerable</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>get</b> → <span style="color:#5a9e8a;">obtain / acquire / gain</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>need</b> → <span style="color:#5a9e8a;">require / demand / necessitate</span></div>
+        <div style="background:#f0f7f4;padding:8px;border-radius:6px;"><b>end</b> → <span style="color:#5a9e8a;">conclude / terminate / culminate</span></div>
+      </div>
+    </div>
+  `;
+}
+
+// ==================== 口语训练 ====================
+function startSpeak(mode) {
+  const ws = document.getElementById('speak-workspace');
+  if (mode === 'part1') {
+    const item = shuffle(speakPart1)[0];
+    ws.innerHTML = `
+      <div class="quiz-area">
+        <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">💬 Part 1 · ${item.topic}</div>
+        <div style="background:#f8fcfa;padding:12px;border-radius:8px;margin-bottom:10px;">
+          ${item.questions.map((q,i) => `<div style="padding:6px 0;border-bottom:1px solid #d4e8e0;color:#3a5a4e;font-size:13px;"><b>Q${i+1}:</b> ${q}</div>`).join('')}
+        </div>
+        <button class="full-btn" style="background:linear-gradient(135deg,#7a9ea8,#5a7e88);" onclick="document.getElementById('speak-sample').classList.toggle('show')">查看地道回答范文</button>
+        <div class="model-answer" id="speak-sample">
+          <h4>📝 参考回答</h4>
+          <div style="color:#4a6b5e;line-height:1.8;font-size:13px;">${item.sample}</div>
+        </div>
+      </div>
+    `;
+  } else if (mode === 'part2') {
+    const item = shuffle(speakPart2)[0];
+    ws.innerHTML = `
+      <div class="quiz-area">
+        <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">🎴 Part 2 · 话题卡</div>
+        <div style="background:linear-gradient(135deg,#e8f0f4,#dce8ec);padding:14px;border-radius:10px;margin-bottom:10px;">
+          <div style="font-weight:700;color:#4a6b5e;margin-bottom:8px;">${item.cue}</div>
+          <div style="font-size:12px;color:#5a7e88;line-height:1.8;">
+            ${item.points.map((p,i) => `<div>• ${p}</div>`).join('')}
+          </div>
+        </div>
+        <div class="timer">01:00</div>
+        <div style="font-size:11px;color:#7a9ea8;text-align:center;margin-bottom:10px;">⬆️ 准备时间（可以对着镜子练习）</div>
+        <button class="full-btn" style="background:linear-gradient(135deg,#7a9ea8,#5a7e88);" onclick="document.getElementById('speak-sample2').classList.toggle('show')">查看参考陈述</button>
+        <div class="model-answer" id="speak-sample2">
+          <h4>📝 参考陈述（约1-2分钟）</h4>
+          <div style="color:#4a6b5e;line-height:1.8;font-size:13px;">${item.sample}</div>
+        </div>
+      </div>
+    `;
+    let sec = 60;
+    const timerEl = ws.querySelector('.timer');
+    const iv = setInterval(() => {
+      sec--;
+      if (sec <= 0) { clearInterval(iv); timerEl.textContent = "开始陈述！"; timerEl.style.color = "#5a9e8a"; }
+      else { timerEl.textContent = (sec < 10 ? '0:0' : '0:') + sec; }
+    }, 1000);
+  } else if (mode === 'expressions') {
+    let html = '<div class="quiz-area">';
+    html += '<div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">🌟 10个加分句型（直接背诵）</div>';
+    speakExpressions.forEach((ex, i) => {
+      html += `<div style="padding:10px;border-bottom:1px solid #d4e8e0;">
+        <div style="font-weight:700;color:#5a7e88;font-size:14px;">${i+1}. ${ex.s}</div>
+        <div style="color:#5a7a6e;font-size:12px;margin-top:2px;">中文：${ex.m}</div>
+        <div style="color:#a8c4b8;font-size:11px;margin-top:2px;">场景：${ex.scene}</div>
+      </div>`;
+    });
+    html += '</div>';
+    ws.innerHTML = html;
+  }
+}
+
+// ==================== 中国文化 ====================
+function startCulture(mode) {
+  const ws = document.getElementById('culture-workspace');
+  if (mode === 'flash') {
+    currentState.cultureIndex = 0;
+    renderCultureFlash(ws);
+  } else if (mode === 'trans') {
+    const t = shuffle(translationDB.filter(x => x.keywords.some(k => ['Spring Festival','Great Wall','calligraphy','Peking Opera','paper-cutting','traditional Chinese medicine'].some(c => k.includes(c)))))[0];
+    if (!t) { ws.innerHTML = '<div class="quiz-area">暂无文化翻译题</div>'; return; }
+    currentState.transIndex = translationDB.indexOf(t);
+    ws.innerHTML = `
+      <div class="quiz-area">
+        <div class="timer" id="trans-timer2">15:00</div>
+        <div style="background:#f8fcfa;padding:12px;border-radius:8px;font-size:13px;line-height:1.8;color:#4a6b5e;margin-bottom:10px;">${t.cn}</div>
+        <textarea class="trans-input" id="trans-answer2" placeholder="在此输入你的英文译文..."></textarea>
+        <button class="full-btn" style="background:linear-gradient(135deg,#c4907a,#b07860);" onclick="showCultureTransModel()">查看范文</button>
+        <div class="model-answer" id="trans-model2">
+          <h4>📝 满分范文</h4>
+          <div style="color:#4a6b5e;line-height:1.8;">${t.en}</div>
+        </div>
+      </div>
+    `;
+    let sec = 900;
+    const timerEl = document.getElementById('trans-timer2');
+    window.transTimer2 = setInterval(() => {
+      sec--;
+      if (sec <= 0) { clearInterval(window.transTimer2); timerEl.textContent = "时间到！"; timerEl.style.color = "#e74c3c"; }
+      else { const m = Math.floor(sec/60), s = sec%60; timerEl.textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+    }, 1000);
+  } else if (mode === 'sentence') {
+    let html = '<div class="quiz-area">';
+    html += '<div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">📜 文化翻译万能句型</div>';
+    cultureSentences.forEach((s, i) => {
+      html += `<div style="padding:10px;border-bottom:1px solid #d4e8e0;">
+        <div style="color:#5a7a6e;font-size:13px;font-weight:600;">"${s.cn}"</div>
+        <div style="color:#7db8a8;font-size:13px;margin-top:4px;">→ ${s.en}</div>
+      </div>`;
+    });
+    html += '</div>';
+    ws.innerHTML = html;
+  } else if (mode === 'quiz') {
+    currentState.grammarList = shuffle(cultureQuizDB);
+    currentState.grammarIndex = 0;
+    currentState.grammarCorrect = 0;
+    renderGrammar(ws);
+  }
+}
+
+function renderCultureFlash(ws) {
+  const v = cultureDB[currentState.cultureIndex];
+  const progress = Math.round((currentState.cultureIndex / cultureDB.length) * 100);
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.cultureIndex + 1} / ${cultureDB.length}</div>
+      <div class="score-tag">${v.cat}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="flashcard" onclick="toggleFlash(this)">
+      <div class="cn">${v.cn}</div>
+      <div class="en">${v.en}</div>
+      <div class="pos">${v.cat}</div>
+    </div>
+    <div class="control-bar">
+      <button class="secondary" onclick="prevCultureFlash()">⬅️ 上一个</button>
+      <button onclick="nextCultureFlash()">下一个 ➡️</button>
+    </div>
+  `;
+}
+
+function nextCultureFlash() {
+  if (currentState.cultureIndex < cultureDB.length - 1) {
+    currentState.cultureIndex++;
+    renderCultureFlash(document.getElementById('culture-workspace'));
+  } else {
+    addLearned(cultureDB.length);
+    document.getElementById('culture-workspace').innerHTML = 
+      '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">文化词汇复习完成！</div><div style="color:#7db8a8;margin-top:8px;">已学习 ' + cultureDB.length + ' 个文化词汇</div></div>';
+  }
+}
+
+function prevCultureFlash() {
+  if (currentState.cultureIndex > 0) {
+    currentState.cultureIndex--;
+    renderCultureFlash(document.getElementById('culture-workspace'));
+  }
+}
+
+function showCultureTransModel() {
+  if (window.transTimer2) clearInterval(window.transTimer2);
+  document.getElementById('trans-model2').classList.add('show');
+  addDone(1);
+}
+
+// ==================== 热门考点 ====================
+function startHot(topic) {
+  const ws = document.getElementById('hot-workspace');
+  const keys = Object.keys(hotTopics);
+  const t = topic === 'random' ? keys[Math.floor(Math.random() * keys.length)] : topic;
+  const data = hotTopics[t];
+  const names = {tech:'科技数码',env:'环保生态',edu:'教育学习',social:'社会民生',econ:'经济发展',health:'健康医疗'};
+
+  let html = '<div class="quiz-area">';
+  html += `<div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">🔥 ${names[t]} 核心词汇</div>`;
+  data.forEach((w, i) => {
+    html += `<div style="padding:10px;border-bottom:1px solid #d4e8e0;">
+      <div style="font-weight:700;color:#5a7a6e;font-size:14px;">${i+1}. ${w.w}</div>
+      <div style="color:#7db8a8;font-size:13px;">${w.m}</div>
+      <div style="color:#a8c4b8;font-size:11px;font-style:italic;margin-top:2px;">${w.e}</div>
+    </div>`;
+  });
+  html += '</div>';
+  ws.innerHTML = html;
+  addLearned(data.length);
+}
+
+// ==================== 真题模拟 ====================
+function startMock(mode) {
+  const ws = document.getElementById('mock-workspace');
+  if (mode === 'read') {
+    const item = mockReadDB[0];
+    currentState.listenItem = item;
+    currentState.listenQIndex = 0;
+    currentState.listenCorrect = 0;
+    renderReadMock(ws, item);
+  } else if (mode === 'listen') {
+    const items = shuffle(listeningDB);
+    const item = items[0];
+    currentState.listenItem = item;
+    currentState.listenQIndex = 0;
+    currentState.listenCorrect = 0;
+    renderListen(ws, item);
+  } else if (mode === 'full') {
+    const item = mockReadDB[0];
+    const trans = translationDB[Math.floor(Math.random() * translationDB.length)];
+    const write = writingDB[Math.floor(Math.random() * writingDB.length)];
+    ws.innerHTML = `
+      <div class="quiz-area">
+        <div style="font-weight:700;color:#4a6b5e;font-size:15px;margin-bottom:10px;">📝 全套模拟卷</div>
+        <div style="background:#f0f7f4;padding:10px;border-radius:8px;font-size:12px;color:#5a7a6e;margin-bottom:10px;">
+          <b>说明：</b>本模拟卷包含阅读1篇（4题）+ 翻译1篇 + 写作1篇。建议用时：阅读20分钟 + 翻译15分钟 + 写作30分钟 = 65分钟。
+        </div>
+        <div style="font-weight:700;color:#4a6b5e;margin:10px 0 6px 0;">📖 阅读理解</div>
+        <div style="background:#f8fcfa;padding:10px;border-radius:6px;font-size:12px;line-height:1.6;color:#4a6b5e;max-height:150px;overflow-y:auto;">${item.passage}</div>
+        <div style="margin-top:8px;font-size:12px;color:#7db8a8;">（阅读题请单独点击"阅读模拟"完成）</div>
+        <div style="font-weight:700;color:#4a6b5e;margin:14px 0 6px 0;">📝 翻译</div>
+        <div style="background:#f8fcfa;padding:10px;border-radius:6px;font-size:12px;line-height:1.6;color:#4a6b5e;">${trans.cn}</div>
+        <div style="font-weight:700;color:#4a6b5e;margin:14px 0 6px 0;">✍️ 写作</div>
+        <div style="background:#f8fcfa;padding:10px;border-radius:6px;font-size:12px;line-height:1.6;color:#4a6b5e;">${write.title}<br><br>思路：${write.outline.replace(/\n/g,' ')}</div>
+      </div>
+    `;
+  } else if (mode === 'word') {
+    currentState.vocabList = shuffle(vocabDB).slice(0, 50);
+    currentState.vocabIndex = 0;
+    currentState.vocabCorrect = 0;
+    currentState.vocabTotal = 50;
+    currentState.vocabMode = 'word';
+    renderEn2Cn(ws);
+  }
+}
+
+function renderReadMock(ws, item) {
+  const q = item.questions[currentState.listenQIndex];
+  const progress = Math.round((currentState.listenQIndex / item.questions.length) * 100);
+  let optHtml = '';
+  q.options.forEach((opt, i) => {
+    optHtml += `<div class="listen-option" onclick="checkReadMock(${i},${i===q.a},this)" data-c="${i===q.a}">${opt}</div>`;
+  });
+  ws.innerHTML = `
+    <div class="score-board">
+      <div class="score-tag">${currentState.listenQIndex + 1}/${item.questions.length}</div>
+      <div class="score-tag">正确: ${currentState.listenCorrect}</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="listen-text" style="max-height:150px;">${item.passage}</div>
+    <div class="listen-question">${q.q}</div>
+    <div class="listen-options">${optHtml}</div>
+    <div class="answer-reveal" id="read-reveal"><b>解析：</b>${q.exp}</div>
+  `;
+}
+
+function checkReadMock(idx, correct, el) {
+  const opts = document.querySelectorAll('#mock-workspace .listen-option');
+  opts.forEach(o => o.classList.add('disabled'));
+  const item = currentState.listenItem;
+  const q = item.questions[currentState.listenQIndex];
+  if (correct) {
+    el.classList.add('correct'); currentState.listenCorrect++; addAccuracy(1, 1);
+  } else {
+    el.classList.add('wrong');
+    opts.forEach(o => { if (o.dataset.c === 'true') o.classList.add('correct'); });
+    saveMistake({type:'阅读模拟',q:q.q,a:q.options[q.a]}); addAccuracy(0, 1);
+  }
+  document.getElementById('read-reveal').classList.add('show');
+  setTimeout(() => {
+    currentState.listenQIndex++;
+    if (currentState.listenQIndex < item.questions.length) renderReadMock(document.getElementById('mock-workspace'), item);
+    else {
+      const acc = Math.round(currentState.listenCorrect / item.questions.length * 100);
+      document.getElementById('mock-workspace').innerHTML = '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">阅读模拟完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.listenCorrect + '/' + item.questions.length + ' (' + acc + '%)</div></div>';
+      addDone(item.questions.length);
+    }
+  }, 2500);
+}
+
+// ==================== 错题本 ====================
+function showMistakes(mode) {
+  const ws = document.getElementById('mistake-workspace');
+  const mistakes = getMistakes();
+  if (mode === 'all') {
+    if (mistakes.length === 0) {
+      ws.innerHTML = '<div class="empty-state"><div class="icon">📒</div><div>暂无错题记录，快去练习吧！</div></div>';
+      return;
+    }
+    let html = '<div style="margin-top:10px;"><button class="full-btn" style="background:#e74c3c;" onclick="clearMistakes();showMistakes('all')">🗑️ 清空错题本</button></div>';
+    html += '<div style="margin-top:10px;">';
+    mistakes.slice().reverse().forEach((m, i) => {
+      html += `<div class="mistake-item">
+        <div style="font-size:10px;color:#a8c4b8;margin-bottom:4px;">[${m.type}] ${m.time}</div>
+        <div class="q">Q: ${m.q}</div>
+        <div class="a">A: ${m.a}</div>
+      </div>`;
+    });
+    html += '</div>';
+    ws.innerHTML = html;
+  } else if (mode === 'redo') {
+    if (mistakes.length === 0) {
+      ws.innerHTML = '<div class="empty-state"><div class="icon">📒</div><div>暂无错题，太棒了！</div></div>';
+      return;
+    }
+    const redoList = shuffle(mistakes).slice(0, 5);
+    currentState.grammarList = redoList.map(m => ({q:m.q, options:[m.a,'其他选项A','其他选项B','其他选项C'], a:0, exp:'来自错题本'}));
+    currentState.grammarIndex = 0;
+    currentState.grammarCorrect = 0;
+    renderGrammar(ws);
+  }
+}
+
+// ==================== 备考规划 ====================
+function showTodayPlan() {
+  const ws = document.getElementById('plan-workspace');
+  const days = Math.ceil((new Date('2026-12-19') - new Date()) / (1000*60*60*24));
+  let plan = '';
+  if (days > 80) {
+    plan = '<b>基础夯实期（当前阶段）</b><br>• 词汇：中→英听写 20个<br>• 高频词组：背诵 10个<br>• 听力：精听填空 1篇<br>• 语法：诊断测试 10题<br>• 文化：闪卡 20个';
+  } else if (days > 40) {
+    plan = '<b>强化提升期</b><br>• 词汇：英→中默写 30个<br>• 听力：长对话/篇章 各1套<br>• 翻译：真题练习 1篇<br>• 写作：模拟题 1篇<br>• 语法：全部20题复习';
+  } else if (days > 14) {
+    plan = '<b>冲刺模考期</b><br>• 全套模拟卷 1套/2天<br>• 错题本复习<br>• 高频词速记 50个<br>• 万能模板背诵<br>• 中国文化词汇突击';
+  } else {
+    plan = '<b>考前调整期</b><br>• 轻量复习，保持手感<br>• 回顾错题本<br>• 背诵作文模板<br>• 调整作息，早睡早起<br>• 准备好准考证和文具！';
+  }
+  ws.innerHTML = `<div class="quiz-area" style="margin-top:10px;"><div style="font-weight:700;color:#4a6b5e;margin-bottom:8px;">📅 今日作战表（剩余${days}天）</div><div style="background:#f8fcfa;padding:12px;border-radius:8px;font-size:13px;line-height:2;color:#4a6b5e;">${plan}</div></div>`;
+}
+
+function showFullPlan() {
+  const ws = document.getElementById('plan-workspace');
+  ws.innerHTML = `
+    <div class="quiz-area" style="margin-top:10px;">
+      <table class="plan-table">
+        <tr><th>阶段</th><th>时间</th><th>核心任务</th></tr>
+        <tr><td><span class="plan-phase phase-1">基础期</span></td><td>现在-10月中旬</td><td>词汇2000+高频词组50个；语法20题吃透；听力文本训练；文化词汇40个</td></tr>
+        <tr><td><span class="plan-phase phase-2">强化期</span></td><td>10月中-11月底</td><td>翻译8篇真题；写作4篇+模板背诵；听力各题型强化；阅读模拟；热点专题</td></tr>
+        <tr><td><span class="plan-phase phase-3">冲刺期</span></td><td>12月-考前</td><td>全套模拟卷；错题本重练；高频词突击；作文模板默写；调整状态</td></tr>
+      </table>
+      <div style="margin-top:10px;font-size:12px;color:#7a6a8a;line-height:1.8;">
+        <b>每周建议节奏：</b><br>
+        周一至周五：每天1小时（词汇20min + 专项训练40min）<br>
+        周六：2小时模考（阅读+翻译+写作限时训练）<br>
+        周日：1小时错题回顾 + 休息调整
+      </div>
+    </div>
+  `;
+}
+
+// ==================== 初始化 ====================
+updateStats();
+</script>
+</body>
+</html>
