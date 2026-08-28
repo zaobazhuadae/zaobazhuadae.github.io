@@ -10,6 +10,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Ping
 .container { max-width: 680px; margin: 0 auto; background: #f5faf8; min-height: 100vh; padding-bottom: 40px; }
 .header { background: linear-gradient(135deg, #a8d5c8 0%, #7db8a8 100%); color: white; padding: 24px 18px; text-align: center; position: relative; }
 .badge { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.25); padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; backdrop-filter: blur(4px); }
+.reset-btn { position: absolute; top: 11px; left: 14px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.45); border-radius: 8px; background: rgba(255,255,255,0.18); color: white; cursor: pointer; font: 700 11px inherit; }
+.reset-btn:hover { background: rgba(255,255,255,0.32); }
 .header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
 .header p { margin: 6px 0 0 0; opacity: 0.9; font-size: 12px; }
 .stats { display: flex; background: #f0f7f4; border-bottom: 1px solid #d4e8e0; }
@@ -122,6 +124,7 @@ input[type="text"]:focus, textarea:focus { border-color: #7db8a8; }
 <body>
 <div class="container">
   <div class="header">
+    <button class="reset-btn" onclick="resetProgress()" title="清空学习记录并重新开始">↻ 重新开始</button>
     <div class="badge">🎯 目标：500分</div>
     <div style="font-size: 38px; margin-bottom: 6px;">🚀</div>
     <h1>四级超级控制台</h1>
@@ -1202,6 +1205,17 @@ function clearMistakes() {
   updateStats();
 }
 
+function resetProgress() {
+  if (!confirm('确定要重新开始吗？学习统计和错题本都会被清空。')) return;
+  ['cet4_mistakes', 'cet4_learned', 'cet4_done', 'cet4_correct', 'cet4_total'].forEach(key => localStorage.removeItem(key));
+  if (window.transTimer) clearInterval(window.transTimer);
+  if (window.transTimer2) clearInterval(window.transTimer2);
+  if (window.writeTimer) clearInterval(window.writeTimer);
+  document.querySelectorAll('[id$="-workspace"]').forEach(workspace => workspace.innerHTML = '');
+  sp('vocab');
+  updateStats();
+}
+
 function getLearned() {
   try { return parseInt(localStorage.getItem('cet4_learned') || '0'); }
   catch(e) { return 0; }
@@ -1278,7 +1292,7 @@ function startVocab(mode) {
         <div style="color:#a8c4b8;font-size:11px;margin-top:4px;font-style:italic;">${v.e}</div>
       </div>`;
     });
-    html += '</div><div class="control-bar"><button onclick="startVocab('flash')">🃏 闪卡复习这10个</button></div>';
+    html += '</div><div class="control-bar"><button onclick="startVocab(\'flash\')">🃏 闪卡复习这10个</button></div>';
     ws.innerHTML = html;
     addLearned(10);
     return;
@@ -1332,7 +1346,7 @@ function nextFlash() {
   } else {
     addLearned(currentState.vocabList.length);
     document.getElementById('vocab-workspace').innerHTML = 
-      '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">闪卡复习完成！</div><div style="color:#7db8a8;margin-top:8px;">已学习 ' + currentState.vocabList.length + ' 个单词</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab('flash')">再来一组</button></div>';
+      '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">闪卡复习完成！</div><div style="color:#7db8a8;margin-top:8px;">已学习 ' + currentState.vocabList.length + ' 个单词</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab(\'flash\')">再来一组</button></div>';
   }
 }
 
@@ -1446,7 +1460,7 @@ function checkEn2Cn(idx, correct, el) {
 function finishVocab(modeName) {
   const acc = Math.round(currentState.vocabCorrect / currentState.vocabTotal * 100);
   document.getElementById('vocab-workspace').innerHTML = 
-    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">' + modeName + ' 完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.vocabCorrect + '/' + currentState.vocabTotal + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab('' + currentState.vocabMode + '')">再来一组</button></div>';
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">' + modeName + ' 完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.vocabCorrect + '/' + currentState.vocabTotal + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#a8d5c8,#7db8a8);margin-top:15px;" onclick="startVocab(\'' + currentState.vocabMode + '\')">再来一组</button></div>';
   addDone(currentState.vocabTotal);
   addLearned(currentState.vocabTotal);
 }
@@ -1553,7 +1567,7 @@ function finishListen() {
   const total = currentState.listenItem.questions.length;
   const acc = Math.round(currentState.listenCorrect / total * 100);
   document.getElementById('listen-workspace').innerHTML = 
-    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">听力练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.listenCorrect + '/' + total + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#6aaa9a,#4a8a7a);margin-top:15px;" onclick="document.getElementById('listen-workspace').innerHTML=''">再来一套</button></div>';
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">听力练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.listenCorrect + '/' + total + ' (' + acc + '%)</div><button class="full-btn" style="background:linear-gradient(135deg,#6aaa9a,#4a8a7a);margin-top:15px;" onclick="document.getElementById(\'listen-workspace\').innerHTML=\'\'">再来一套</button></div>';
   addDone(total);
 }
 
@@ -1656,7 +1670,7 @@ function finishGrammar() {
   const acc = Math.round(currentState.grammarCorrect / total * 100);
   let msg = acc >= 80 ? '太棒了！语法基础很扎实！' : acc >= 60 ? '还不错，继续加油！' : '需要加强，建议多复习错题本！';
   document.getElementById('grammar-workspace').innerHTML = 
-    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">语法练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.grammarCorrect + '/' + total + ' (' + acc + '%)</div><div style="color:#a07858;margin-top:6px;font-size:13px;">' + msg + '</div><button class="full-btn" style="background:linear-gradient(135deg,#a8a080,#908868);margin-top:15px;" onclick="startGrammar('diag')">再来一组</button></div>';
+    '<div class="quiz-area" style="text-align:center;padding:30px;"><div style="font-size:32px;margin-bottom:10px;">🎉</div><div style="font-weight:700;color:#5a9e8a;font-size:16px;">语法练习完成！</div><div style="color:#7db8a8;margin-top:8px;">正确率：' + currentState.grammarCorrect + '/' + total + ' (' + acc + '%)</div><div style="color:#a07858;margin-top:6px;font-size:13px;">' + msg + '</div><button class="full-btn" style="background:linear-gradient(135deg,#a8a080,#908868);margin-top:15px;" onclick="startGrammar(\'diag\')">再来一组</button></div>';
   addDone(total);
 }
 
@@ -2075,7 +2089,7 @@ function showMistakes(mode) {
       ws.innerHTML = '<div class="empty-state"><div class="icon">📒</div><div>暂无错题记录，快去练习吧！</div></div>';
       return;
     }
-    let html = '<div style="margin-top:10px;"><button class="full-btn" style="background:#e74c3c;" onclick="clearMistakes();showMistakes('all')">🗑️ 清空错题本</button></div>';
+    let html = '<div style="margin-top:10px;"><button class="full-btn" style="background:#e74c3c;" onclick="clearMistakes();showMistakes(\'all\')">🗑️ 清空错题本</button></div>';
     html += '<div style="margin-top:10px;">';
     mistakes.slice().reverse().forEach((m, i) => {
       html += `<div class="mistake-item">
