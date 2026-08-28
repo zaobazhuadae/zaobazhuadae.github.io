@@ -173,7 +173,7 @@ input[type="text"]:focus, textarea:focus { border-color: #7db8a8; }
   <!-- VOCAB -->
   <div class="panel active" id="panel-vocab">
     <div class="card" style="background: linear-gradient(135deg, #e8f4f0 0%, #d4ece4 100%);">
-      <div class="card-header"><span style="font-size:18px;">📖</span><span class="card-title">词汇训练</span><span class="card-badge">200核心词</span></div>
+      <div class="card-header"><span style="font-size:18px;">📖</span><span class="card-title">词汇训练</span><span class="card-badge" id="vocab-count-badge">当前词库</span></div>
       <div class="tip" style="background:rgba(125,184,168,0.08);border-color:#7db8a8;color:#5a9e8a;">💡 内置四级核心词汇库，随机抽考。答错会自动加入错题本！</div>
       <div class="btn-grid btn-grid-2">
         <button class="action-btn" onclick="startVocab('cn2en')"><div class="icon">🎧</div><div class="title">中→英听写</div><div class="desc">看中文写英文</div></button>
@@ -1255,6 +1255,7 @@ function updateStats() {
   document.getElementById('stat-learned').textContent = getLearned();
   document.getElementById('stat-done').textContent = getDone();
   document.getElementById('stat-accuracy').textContent = getAccuracy();
+  document.getElementById('vocab-count-badge').textContent = '当前 ' + vocabDB.length + ' 词';
   const days = Math.ceil((new Date('2026-12-19') - new Date()) / (1000*60*60*24));
   document.getElementById('stat-days').textContent = (days > 0 ? days : 0) + '天';
 }
